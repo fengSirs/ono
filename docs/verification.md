@@ -8,11 +8,11 @@ Phiz 分享适配器测试使用注入的模拟会话选择/聊天传输，验�
 
 ## 尚需在你的开发环境完成
 
-用户提供的 App ID `6af75cf50efc7c0001051c74` 已配置。本机未安装 FinClip Studio，仍缺少 Phiz SDK 和身份接口，因此没有生成 .fap 或真机运行截图，也尚未在 Phiz 小程序平台发布。独立后端与服务入口已部署到 https://ono.phizminiapp.com/。
+用户提供的 App ID `6af733830efc7c0001051c6a` 已配置。本机未安装 FinClip Studio，仍缺少 Phiz SDK 和身份接口，因此没有生成 .fap 或真机运行截图，也尚未在 Phiz 小程序平台发布。独立后端与服务入口已部署到 https://ono.phizminiapp.com/。
 
 接手后按下列业务流程验收：
 
-1. 在 FinClip Studio 导入项目并核对已填写的 App ID `6af75cf50efc7c0001051c74`，编译原生 WXML/WXSS；使用当前匹配宿主 SDK 的基础库。建议 iOS SDK ≥2.10.4、Android SDK ≥2.11.39（依据 compressImage 支持版本，仍需核对完整宿主版本兼容性）。
+1. 在 FinClip Studio 导入项目并核对已填写的 App ID `6af733830efc7c0001051c6a`，编译原生 WXML/WXSS；使用当前匹配宿主 SDK 的基础库。建议 iOS SDK ≥2.10.4、Android SDK ≥2.11.39（依据 compressImage 支持版本，仍需核对完整宿主版本兼容性）。
 2. API 设置合法 HTTPS 域名，authMode 改 finclip；真机同一 Phiz 身份重新登录能恢复钱包。
 3. 360×640、375×667、390×844 与横屏检查 PT-BR/EN/ZH：昵称、多人牌桌、很多手牌、出牌/UNO 按钮、结果弹层、火鸡区及键盘。
 4. Android/iOS 分别在好友会话和群聊中实际发送卡片；检查缩略图、房号和标题。分别从未运行、后台和正在其他房间三种状态点击卡片。

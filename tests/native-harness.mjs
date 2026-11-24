@@ -30,6 +30,10 @@ export function native() {
     },
     navigateBack() {},
     hideShareMenu() {},
+    login(o) {
+      calls.push({ type: "login" });
+      o.success({ code: "test-code" });
+    },
     showActionSheet(o) {
       calls.push({ type: "color", ...o });
       if (ft.cancelColor) o.fail({ errMsg: "cancel" });

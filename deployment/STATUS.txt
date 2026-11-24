@@ -1,7 +1,7 @@
 Updated 2026-11-18. DNS AND HTTPS VERIFIED; INDEPENDENT SERVICE DEPLOYED.
 Verified URL: https://ono.phizminiapp.com/
 Server: <SERVER_IP>
-App ID: 6af75cf50efc7c0001051c74
+App ID: 6af733830efc7c0001051c6a
 Service: ono-finclip.service, enabled and active, listening only on 127.0.0.1:4390
 Release: /opt/ono-finclip/releases/20261118-024153-v1.0.1-native
 Data: /var/lib/ono-finclip/ono.sqlite

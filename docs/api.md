@@ -2,7 +2,7 @@
 
 ## 身份
 
-当前已配置用户提供的 App ID：`6af75cf50efc7c0001051c74`。开发与生产环境变量示例均已预填 `FINCLIP_APP_ID`，不要把身份交换服务密钥写入小程序。
+当前已配置用户提供的 App ID：`6af733830efc7c0001051c6a`。开发与生产环境变量示例均已预填 `FINCLIP_APP_ID`，不要把身份交换服务密钥写入小程序。
 
 正式模式下，小程序 `ft.login` 获取 code，将 `{code,name}` 发至 `POST /v1/auth/finclip`。后端调用 **由 Phiz 团队提供的 HTTPS 身份校验服务**：
 

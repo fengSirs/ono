@@ -30,7 +30,7 @@
 - 独立后端：Node.js 22 + `node:sqlite`，源码在 `backend/src/`，已构建的独立运行产物在 `backend/runtime/`。
 - 后端运行**不需要** `npm install`，`backend/runtime/` 只依赖 Node 标准库。
 - 包含 9 个页面：大厅、邀请、房间、对局、养成、任务、申领、规则、每周排行榜。
-- 已包含 App ID `6af75cf50efc7c0001051c74` 的项目配置。
+- 已包含 App ID `6af733830efc7c0001051c6a` 的项目配置。
 - **不包含**：`node_modules`、生产 `.env`、线上数据库、真实用户数据、SSH 密钥、服务器密码、Phiz 私有 SDK、已编译的 `.fap`。
 
 包内另外提供：
@@ -126,7 +126,7 @@ sudo -u ono-finclip cp /var/lib/ono-finclip/ono.sqlite \
 | `PORT` | `4390` | 默认端口 |
 | `ONO_DB` | `/var/lib/ono-finclip/ono.sqlite` | 必须可写，不能放在 release 目录 |
 | `PUBLIC_BASE_URL` | `https://ono.phizminiapp.com` | 公开 HTTPS 地址 |
-| `FINCLIP_APP_ID` | `6af75cf50efc7c0001051c74` | 与小程序一致 |
+| `FINCLIP_APP_ID` | `6af733830efc7c0001051c6a` | 与小程序一致 |
 | `AUTH_MODE` | 先 `pending`，接入身份后 `finclip` | `pending` 会关闭登录/对局/榜单/奖励 |
 | `AUTH_EXCHANGE_URL` | 身份服务地址 | 仅在 `AUTH_MODE=finclip` 时需要 |
 | `AUTH_EXCHANGE_TOKEN` | 服务端密钥 | 不要写进小程序 |
@@ -157,6 +157,19 @@ curl -sS https://ono.phizminiapp.com/healthz
 curl -sS https://ono.phizminiapp.com/v1/config
 ```
 
+#### App ID 切换（Bora Ono）
+
+2026-11-24 平台侧已切换到 Bora Ono，小程序 App ID 为 `6af733830efc7c0001051c6a`。生产服务器必须同步，否则 `/v1/config` 和 Phiz 身份交换仍使用旧 App ID：
+
+```sh
+sudo sed -i 's/^FINCLIP_APP_ID=.*/FINCLIP_APP_ID=6af733830efc7c0001051c6a/' /etc/ono-finclip.env
+sudo systemctl restart ono-finclip
+curl -sS https://ono.phizminiapp.com/healthz
+curl -sS https://ono.phizminiapp.com/v1/config
+```
+
+确认两个响应里的 `appId` 都是 `6af733830efc7c0001051c6a`。如果只改前端、不改服务器，`AUTH_MODE` 切到 `finclip` 后身份交换会失败。
+
 ### 2.3 小程序前端部署
 
 1. 进入 `miniapp/`，复制生产配置：
@@ -170,19 +183,19 @@ cp config.production.example.js config.js
 ```js
 module.exports = {
   apiBase: "https://ono.phizminiapp.com",
-  appId: "6af75cf50efc7c0001051c74",
+  appId: "6af733830efc7c0001051c6a",
   authMode: "finclip",
   pollMs: 1200,
   requestTimeout: 15000,
 };
 ```
 
-3. 在 FinClip Studio 导入 `miniapp/`，确认 App ID 为 `6af75cf50efc7c0001051c74`。
+3. 在 FinClip Studio 导入 `miniapp/`，确认 App ID 为 `6af733830efc7c0001051c6a`。
 4. 在 FinClip 后台配置 request / downloadFile 合法域名，必须包含 `https://ono.phizminiapp.com`。
 5. 编译生成 `.fap`，在 Phiz 平台发布。
 6. **不要把本地 `authMode: "guest"` 的 `config.js` 打进正式包。** 本机预览可以保留，但发布前必须替换。
 
-当前包内 `miniapp/config.js` 是本地联调值，这是本轮为了 FinClip 模拟器预览留下的，不是生产值。
+当前仓库的 `miniapp/config.js` 已在发布前切到生产值；每次重新打包前仍建议执行 `npm run config:prod` 再确认一次。
 
 ---
 

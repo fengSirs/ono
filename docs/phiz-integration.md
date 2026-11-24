@@ -41,7 +41,7 @@ const adapter = createPhizCardAdapter({
 {
   "type": "mini_program",
   "version": 1,
-  "appId": "6af75cf50efc7c0001051c74",
+  "appId": "6af733830efc7c0001051c6a",
   "title": "ONO! • Sala 123456 • Vamos jogar?",
   "description": "Sala grátis para 4 pessoas.",
   "imageUrl": "https://api.example.com/assets/invites/OPAQUE_TOKEN.png",
@@ -89,7 +89,7 @@ shareAppMessage(appInfo: String, bitmap: Bitmap?, callback: IAppletCallback)
 
 ## 必需联调资料
 
-App ID 已配置为 `6af75cf50efc7c0001051c74`（来自用户提供，需在平台核对它对应 ONO! 小程序）。仍需 SDK 版本、Phiz 聊天消息类型与会话选择器接口、FinClip SDK 打开小程序的方法、Phiz 的登录 code 校验接口，以及测试好友/群聊。包内已提供可测试的适配协议与实现；实际 Phiz SDK 发送未验收。
+App ID 已配置为 `6af733830efc7c0001051c6a`（来自用户提供，需在平台核对它对应 ONO! 小程序）。仍需 SDK 版本、Phiz 聊天消息类型与会话选择器接口、FinClip SDK 打开小程序的方法、Phiz 的登录 code 校验接口，以及测试好友/群聊。包内已提供可测试的适配协议与实现；实际 Phiz SDK 发送未验收。
 
 ## 官方依据
 

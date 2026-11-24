@@ -111,7 +111,7 @@ PORT=4390
 ALLOW_DEV_GUESTS=false
 ONO_DB=/var/lib/ono-finclip/ono.sqlite
 PUBLIC_BASE_URL=https://ono.phizminiapp.com
-FINCLIP_APP_ID=6af75cf50efc7c0001051c74
+FINCLIP_APP_ID=6af733830efc7c0001051c6a
 AUTH_MODE=pending
 TRUST_LOOPBACK_PROXY=true
 ```

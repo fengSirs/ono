@@ -213,7 +213,7 @@ test("lobby name prompt preserves room settings and returns to the create dialog
     const page = n.page('lobby');
     page.onLoad();
     n.pages.push(page);
-    n.respond(o => o.url.endsWith('/auth/guest') ? {session:{id:'u',name:'Ana',token:'sample'}} : {name:'Ana'});
+    n.respond(o => (o.url.endsWith('/auth/guest') || o.url.endsWith('/auth/finclip')) ? {session:{id:'u',name:'Ana',token:'sample'}} : {name:'Ana'});
     page.showModal({currentTarget:{dataset:{modal:'create'}}});
     page.select({currentTarget:{dataset:{field:'capacity',value:3}}});
     page.enter({currentTarget:{dataset:{op:'create'}}});
