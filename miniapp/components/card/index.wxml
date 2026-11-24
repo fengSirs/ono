@@ -1,0 +1,8 @@
+<view
+  class="card {{card.color}} {{selected ? 'selected' : ''}} {{disabled ? 'dim' : ''}} {{compact ? 'compact' : ''}}"
+  bindtap="tap"
+  aria-label="{{card.label}}"
+  ><view class="corner">{{card.face}}</view
+  ><view class="oval"><text class="face">{{card.face}}</text></view
+  ><view class="corner bottom">{{card.face}}</view></view
+>

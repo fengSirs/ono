@@ -1,0 +1,151 @@
+.pet-panel {
+  border-color: #d9bc72;
+}
+.habitat {
+  position: relative;
+  height: 420rpx;
+  border-radius: 24rpx;
+  background: #e5edcd;
+  text-align: center;
+  overflow: hidden;
+  margin-bottom: 24rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.scene-1 {
+  background: #e9daaa;
+}
+.scene-2 {
+  background: #b6d3ac;
+}
+.scene-3 {
+  background: #213b59;
+  color: #fff;
+}
+.scene-4 {
+  background: #f5d27e;
+}
+.stars {
+  position: absolute;
+  top: 16rpx;
+  left: 0;
+  right: 0;
+  font-size: 40rpx;
+  color: #c29035;
+  letter-spacing: 14rpx;
+}
+.turkey {
+  height: 280rpx;
+  width: 320rpx;
+  flex: none;
+  transition: transform 0.25s;
+}
+.bounce {
+  transform: translateY(-12rpx) rotate(5deg);
+}
+.egg {
+  font-size: 170rpx;
+  height: 260rpx;
+  line-height: 260rpx;
+}
+.warming {
+  animation: warm 0.7s infinite alternate;
+}
+@keyframes warm {
+  from {
+    transform: rotate(-6deg);
+  }
+  to {
+    transform: rotate(6deg);
+  }
+}
+.pet-talk {
+  font-size: 26rpx;
+  line-height: 1.4;
+  padding: 0 20rpx;
+  z-index: 2;
+}
+.wallet {
+  display: flex;
+  gap: 20rpx;
+  justify-content: space-around;
+  text-align: center;
+  margin: 24rpx 0;
+}
+.wallet > view {
+  flex: 1;
+  min-width: 0;
+}
+.prize {
+  width: 100%;
+  height: 370rpx;
+}
+
+.compact-farm { padding-top:20rpx; }
+.compact-header { display:flex; align-items:center; justify-content:space-between; gap:14rpx; margin-bottom:16rpx; }
+.compact-title { flex:1; min-width:0; font-size:36rpx; font-weight:800; line-height:1.3; }
+.compact-farm .panel { padding:24rpx; margin:18rpx 0; border-radius:24rpx; box-shadow:none; }
+.compact-farm .habitat { height:300rpx; margin-bottom:20rpx; }
+.compact-farm .turkey { height:230rpx; width:270rpx; }
+.compact-farm .egg { width:110rpx; height:148rpx; border-radius:52% 52% 46% 46%; background:linear-gradient(120deg,#fffef7,#e8e1c8); box-shadow:inset -8rpx -5rpx 16rpx #d7cda4; margin-bottom:12rpx; }
+.compact-farm .pet-talk { font-size:24rpx; }
+.compact-farm .progress-fill { background:#1d624b; }
+.compact-farm .wallet { margin:18rpx 0; text-align:left; gap:12rpx; }
+.compact-farm .wallet > view { background:#edf1e5; padding:14rpx 20rpx; border-radius:16rpx; }
+.compact-farm .wallet text { display:block; }
+.compact-farm .metric { font-size:36rpx; }
+.compact-farm .muted { font-size:24rpx; }
+.feed-controls { display:flex; align-items:center; gap:12rpx; }
+.feed-amount { width:130rpx; flex:none; text-align:center; min-height:88rpx; padding:16rpx; }
+.feed-main { flex:1; min-width:0; }
+.exchange-row { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12rpx; margin-top:14rpx; }
+.exchange-row > text { color:#526c5b; font-size:24rpx; }
+.compact-weekly .subtitle { margin:0; }
+.weekly-places { font-size:30rpx; font-weight:800; color:#1d624b; }
+.weekly-hint { font-size:24rpx; color:#526c5b; margin-top:10rpx; }
+.my-rank { color:#1d624b; font-size:28rpx; font-weight:700; margin-top:14rpx; }
+.weekly-state { font-size:26rpx; line-height:1.5; margin:12rpx 0 18rpx; }
+.weekly-actions { display:flex; flex-wrap:wrap; gap:12rpx; }
+.weekly-actions > button { flex:1; min-width:220rpx; font-size:26rpx; padding:18rpx 16rpx; min-height:80rpx; }
+.task-entry { margin-top:18rpx; }
+.extras-toggle { background:transparent; color:#526c5b; font-size:26rpx; margin:12rpx auto; min-height:80rpx; padding:18rpx; }
+
+.compact-header .small { min-height:64rpx; font-size:24rpx; padding:8rpx 22rpx; border-radius:32rpx; line-height:1.5; flex:none; }
+.compact-farm .pet-panel { background:#fffef8; border-color:#eadfc7; padding:20rpx; }
+.compact-farm .habitat { height:388rpx; border-radius:30rpx; background:radial-gradient(ellipse at 50% 78%,#f6d791,transparent 50%),linear-gradient(#fbf4dd,#f6e9c2); }
+.compact-farm .scene-1 { background:radial-gradient(at 50% 72%,#ffe8ac,transparent 70%),linear-gradient(#f4edce,#fcf3dc); }
+.compact-farm .scene-2 { background:linear-gradient(#edf1df,#f7efd9); }
+.compact-farm .scene-3 { background:linear-gradient(155deg,#224a4d,#345b57 55%,#b9b68a); }
+.compact-farm .scene-4 { background:radial-gradient(#fff9d3,#efcf85 60%,#f4dfb4); }
+.compact-farm .turkey { width:330rpx; height:280rpx; }
+.compact-farm .pet-talk { padding:9rpx 20rpx; background:#fff9e8; border:2rpx solid #dfcca5; color:#68573c; border-radius:36rpx; }
+.compact-farm .egg { background:repeating-linear-gradient(15deg,transparent 0 26rpx,#b958594d 27rpx 34rpx,transparent 35rpx 48rpx),linear-gradient(125deg,#fffbec,#e8d0a0); box-shadow:0 13rpx 0 #cbad6a77,inset -8rpx -5rpx 16rpx #dac49e; }
+.compact-farm .wallet { padding:16rpx; border-radius:18rpx; background:#f7f3e7; }
+.compact-farm .compact-weekly { background:#f4ead1; border-color:#e3cc9c; }
+.tabs { display:flex; gap:6rpx; padding:6rpx; border:2rpx solid #e0d6bd; background:#f3efdf; border-radius:20rpx; }
+.tabs button { flex:1; font-size:26rpx; min-height:76rpx; padding:17rpx 10rpx; }
+.tabs .tab-off { background:transparent; color:#65745b; }
+.challenge-card { margin:24rpx 0; padding:6rpx; border:2rpx solid #ccad72; border-radius:30rpx; background:#fff9e9; overflow:hidden; }
+.challenge-cover { background:#154e3f; color:#fff9e9; border-radius:22rpx 22rpx 0 0; padding:0 24rpx; }
+.fairy-lights { height:18rpx; background:radial-gradient(circle at 8rpx 8rpx,#ffe6a1 0 3rpx,transparent 4rpx) 0 0 / 36rpx 18rpx repeat-x; border-top:2rpx solid #b99b60; }
+.challenge-tags,.challenge-art { display:flex; align-items:center; justify-content:space-between; gap:14rpx; }
+.holiday-tag,.rank-ticket { padding:6rpx 14rpx; font-size:23rpx; font-weight:700; line-height:1.35; }
+.holiday-tag { background:#a93843; color:#fff5df; border-radius:5rpx; flex:none; }
+.rank-ticket { color:#553d20; background:#f8df9e; border-radius:30rpx; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; }
+.challenge-art { position:relative; min-height:170rpx; }
+.challenge-title { flex:1; font-size:42rpx; line-height:1.12; font-weight:800; padding:14rpx 0; }
+.challenge-turkey { flex:none; width:155rpx; height:166rpx; }
+.star-flight { position:absolute; right:5rpx; top:10rpx; font-size:20rpx; color:#ffda90; pointer-events:none; }
+.challenge-won .star-flight { animation:rank-stars .95s ease-out 1; }
+.challenge-won .challenge-turkey { animation:rank-wave .65s ease-in-out 1; transform-origin:center bottom; }
+@keyframes rank-stars { from {transform:translateY(70rpx) scale(.45);opacity:0;} to {transform:translateY(0) scale(1);opacity:1;} }
+@keyframes rank-wave { 30% {transform:rotate(-7deg);} 70% {transform:rotate(5deg);} }
+.challenge-footer { padding:20rpx; color:#304c3b; font-size:28rpx; line-height:1.5; }
+.challenge-hint { min-height:42rpx; }
+.challenge-actions { margin-top:14rpx; }
+.challenge-cta { margin:0; position:relative; display:flex; align-items:center; justify-content:center; width:100%; min-height:84rpx; padding:16rpx 44rpx; background:#225b46; color:#fff8e8; line-height:1.25; }
+.challenge-link { display:flex; align-items:center; justify-content:center; text-align:center; margin-top:10rpx; background:transparent; color:#28513f; border:2rpx solid #cdb98f; min-height:64rpx; font-size:24rpx; padding:0 20rpx; border-radius:18rpx; }
+.reward-ready { background:#aa3945; }
+.cta-arrow { position:absolute; right:20rpx; }

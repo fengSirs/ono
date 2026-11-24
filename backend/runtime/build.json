@@ -1,0 +1,7 @@
+{
+  "application": "ONO-FinClip",
+  "version": "1.0.1",
+  "runtime": "Node >=22.14",
+  "frontend": "native WXML/WXSS/Page",
+  "sourceOnly": true
+}

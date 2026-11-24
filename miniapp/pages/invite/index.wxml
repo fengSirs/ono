@@ -1,0 +1,33 @@
+<view class="screen"
+  ><view class="header"><image class="brand-logo" src="/assets/brand/ono-logo.png" mode="aspectFit" aria-label="ONO!" /></view
+  ><view class="panel stack center"
+    ><view class="title">{{t.inviteWelcome}}</view
+    ><view wx:if="{{preview}}"
+      ><view class="muted">{{t.roomNumber}}</view
+      ><view class="code">{{preview.code}}</view><view>{{preview.host}}</view
+      ><view class="pill"
+        >{{preview.players.length}} / {{preview.capacity}} · {{preview.rounds}}
+        {{t.roundCount}}</view
+      ><view class="player" wx:for="{{preview.players}}" wx:key="name"
+        ><view class="avatar">{{item.name[0]}}</view
+        ><text>{{item.name}}</text></view
+      ></view
+    ><view wx:if="{{error}}" class="error">{{error}}</view
+    ><input
+      value="{{name}}"
+      bindinput="nameInput"
+      maxlength="20"
+      placeholder="{{t.nickname}}"
+    /><button
+      class="full"
+      bindtap="join"
+      disabled="{{busy || !preview || preview.full || preview.status !== 'waiting'}}"
+      loading="{{busy}}"
+    >
+      {{t.inviteJoin}}</button
+    ><button class="secondary full" bindtap="refresh">{{t.retry}}</button
+    ><button wx:if="{{savedRoom}}" class="secondary full" bindtap="resume">
+      {{t.resume}}</button
+    ><button class="secondary full" bindtap="home">{{t.lobby}}</button></view
+  ></view
+>

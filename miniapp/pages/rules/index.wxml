@@ -1,0 +1,14 @@
+<view class="screen"
+  ><view class="header"
+    ><image class="brand-logo" src="/assets/brand/ono-logo.png" mode="aspectFit" aria-label="ONO!" />
+    <button class="small secondary" bindtap="back">← {{t.lobby}}</button></view
+  ><view class="panel"
+    ><view class="title">{{t.rulesTitle}}</view
+    ><view>{{t.rulesBody}}</view></view
+  ><view class="panel"
+    ><view class="title">{{c.rules}}</view
+    ><view wx:for="{{rules}}" wx:key="*this" class="rule-row"><text class="rule-num">{{index + 1}}</text><text class="grow">{{item}}</text></view
+    ><view wx:for="{{tiers}}" wx:key="*this" class="pill pad-top">{{item}}</view
+    ><view class="help">{{c.dailyIntro}} · {{c.taskNoAuto}}</view></view
+  ><view wx:if="{{error}}" class="error">{{error}}</view></view
+>

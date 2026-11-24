@@ -1,0 +1,24 @@
+<view class="screen compact-board">
+  <view class="board-header"><button class="board-nav" bindtap="back">{{t.back}}</button><view class="board-title">{{t.weeklyBoardTitle}}</view><button class="board-nav" bindtap="toggleRules" aria-expanded="{{showRules}}">{{showRules ? t.compactHideRules : t.compactRules}}</button></view>
+  <view class="board-note">{{t.compactRulesHint}}</view>
+  <view wx:if="{{error}}" class="error">{{error}}</view>
+  <view wx:if="{{board}}">
+    <view class="notice" wx:if="{{!board.canEarn}}">{{board.phase === 'paused' ? c.paused : c.ended}}</view>
+
+    <view wx:if="{{showRules}}" class="panel board-rules"><text class="rules-title">{{t.compactRules}}</text><view class="rules-line">{{t.weeklyRule}}</view><view class="rules-line">{{t.weeklySchedule}}</view><view class="rules-line">{{t.weeklyDeadline}}</view><view class="rules-line muted">{{t.weeklyPrivacy}}</view></view>
+
+    <view class="week-nav"><button class="week-arrow" disabled="{{loading || !board.previousWeek}}" bindtap="previous">‹</button><view class="week-center"><text class="week-date">{{weeklyView.compactWindow}}</text><text wx:if="{{board.week === board.currentWeek}}" class="week-tag">{{t.weeklyThisWeek}}</text></view><button class="week-arrow" disabled="{{loading || !board.nextWeek}}" bindtap="next">›</button></view>
+    <button wx:if="{{board.week !== board.currentWeek}}" class="current-week" bindtap="current" disabled="{{loading}}">{{t.weeklyCurrent}}</button>
+
+    <view class="board-summary"><view class="summary-head"><text class="summary-title">{{t.compactBoardHint}}</text></view><view class="summary-body"><view class="places"><text class="places-label">{{t.compactRemaining}}</text><view class="places-value">{{board.remaining}}<text class="places-total">/ 100</text></view></view><view class="deadline"><text class="deadline-label">{{countdownLabel}}</text><text class="deadline-value">{{countdown}}</text></view></view><view class="summary-progress"><view class="summary-progress-fill" style="width:{{fill}}%"></view></view></view>
+
+    <view class="my-result" wx:if="{{showResult}}"><view class="my-result-copy"><text class="my-position" wx:if="{{weeklyView.compactRank}}">{{weeklyView.compactRank}}</text><text class="rank-caption" wx:if="{{weeklyView.compactRank}}">{{weeklyView.compactOwnWeek}}</text><text class="my-status">{{weeklyView.compactStatus}}</text></view></view>
+
+    <view wx:if="{{join}}" class="join-panel"><text class="join-title">{{t.weeklyJoinTitle}}</text><text class="join-hint">{{join.hint}}</text><button class="join-action" bindtap="joinAction">{{join.button}}</button></view>
+
+    <view class="rank-list"><view class="rank-table-header"><text class="rank-number">#</text><text class="rank-name">{{t.compactName}}</text><text class="rank-time-head">{{t.compactTime}}</text></view>
+      <view wx:if="{{!entries.length}}" class="rank-empty"><image class="rank-empty-img" src="/assets/christmas/turkey-baby.webp" mode="aspectFit" aria-hidden="true" /><text>{{board.closed ? t.weeklyEmpty : t.compactEmpty}}</text></view>
+      <view wx:for="{{entries}}" wx:key="rank" class="rank-row {{item.isMe ? 'is-me' : ''}}"><text class="rank-number {{item.rank === 1 ? 'medal-gold' : item.rank === 2 ? 'medal-silver' : item.rank === 3 ? 'medal-bronze' : ''}}">{{item.rank}}</text><view class="rank-name"><text class="player-name">{{item.name}}</text><text wx:if="{{item.isMe}}" class="me-label">{{t.weeklyMe}}</text></view><view class="rank-time"><view>{{item.date}}</view><view>{{item.time}}</view></view></view>
+    </view>
+  </view><button wx:else class="full" bindtap="refresh">{{t.retry}}</button>
+</view>

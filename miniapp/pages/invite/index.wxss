@@ -1,0 +1,3 @@
+.panel { max-width:820rpx; margin:36rpx auto; }
+.panel .title { color:#235c46; }
+.panel .player { justify-content:center; }

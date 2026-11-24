@@ -1,0 +1,105 @@
+<view class="screen"
+  ><view class="header"
+    ><image class="brand-logo" src="/assets/brand/ono-logo.png" mode="aspectFit" aria-label="ONO!" />
+    <button class="small secondary" bindtap="back">← {{c.pet}}</button></view
+  ><view class="title">{{c.dailyTab}}</view
+  ><view class="notice">{{c.taskNoUno}} {{c.taskNoAuto}}</view
+  ><view class="muted">{{quota}}</view
+  ><view class="help">{{maxText}} · {{c.dailyReset}}</view
+  ><view wx:if="{{error}}" class="error">{{error}}</view
+  ><view wx:if="{{editing}}" class="panel stack"
+    ><view class="title">{{editing.title}}</view
+    ><view class="notice">{{editing.guide}}</view
+    ><view class="field-label">{{c.taskPhizId}}</view
+    ><input
+      value="{{phizId}}"
+      data-field="phizId"
+      bindinput="field"
+      disabled="{{profileLocked}}"
+      maxlength="80"
+    /><textarea
+      value="{{details}}"
+      data-field="details"
+      bindinput="field"
+      maxlength="1600"
+      placeholder="{{t.taskDetails}}"
+    /><view class="proof-grid"
+      ><view wx:for="{{previews}}" wx:key="*this" class="proof"
+        ><image src="{{item}}" mode="aspectFill" /><button
+          class="remove"
+          data-index="{{index}}"
+          bindtap="remove"
+        >
+          ×
+        </button></view
+      ></view
+    ><button
+      class="secondary full"
+      bindtap="choose"
+      disabled="{{busy || proofs.length >= 3}}"
+    >
+      {{t.chooseProof}} ({{proofs.length}}/3)</button
+    ><view class="help">{{t.imageTooLarge}}</view
+    ><checkbox-group bindchange="consent"
+      ><label class="tick"
+        ><checkbox value="yes" checked="{{consent}}" /><text
+          >{{t.proofConsent}}</text
+        ></label
+      ></checkbox-group
+    ><button
+      class="full"
+      bindtap="submit"
+      disabled="{{busy || !consent || !proofs.length || details.length < 10 || phizId.length < 3}}"
+    >
+      {{t.sendProof}}</button
+    ><button class="secondary full" bindtap="close">{{t.cancel}}</button></view
+  ><view wx:else
+    ><view wx:for="{{tasks}}" wx:key="id" class="panel stack mission"
+      ><view class="mission-heading"><text class="mission-icon">{{index+1}}</text><text class="subtitle">{{item.title}}</text></view
+      ><view class="row between"
+        ><text class="pill">{{item.rewardText}}</text
+        ><text class="muted">{{item.statusText}}</text></view
+      ><view wx:if="{{item.note}}" class="notice">{{item.note}}</view
+      ><button
+        wx:if="{{item.ready}}"
+        class="gold full"
+        bindtap="claim"
+        data-id="{{item.submission.id}}"
+        disabled="{{busy}}"
+      >
+        {{item.claimText}}</button
+      ><button
+        wx:elif="{{item.canSubmit}}"
+        class="full"
+        bindtap="edit"
+        data-id="{{item.id}}"
+      >
+        {{c.taskGo}}</button
+      ><button
+        wx:if="{{item.submission}}"
+        class="secondary full"
+        bindtap="evidence"
+        data-id="{{item.submission.id}}"
+      >
+        {{c.taskView}}
+      </button></view
+    ><view class="title" wx:if="{{history.length}}">{{c.taskHistory}}</view
+    ><view wx:for="{{history}}" wx:key="id" class="panel stack"
+      ><view class="subtitle">{{item.title}}</view
+      ><view>{{item.day}} · {{item.statusText}}</view
+      ><view class="notice" wx:if="{{item.note}}">{{item.note}}</view
+      ><button
+        wx:if="{{item.status === 'approved'}}"
+        class="gold full"
+        bindtap="claim"
+        data-id="{{item.id}}"
+        disabled="{{busy}}"
+      >
+        {{item.claimText}}</button
+      ><button class="secondary full" bindtap="evidence" data-id="{{item.id}}">
+        {{c.taskView}}
+      </button></view
+    ><button class="secondary full" bindtap="refresh">{{c.taskRefresh}}</button
+    ><view class="help">{{c.taskBeforeDeadline}} {{c.taskBacklog}}</view></view
+  ></view
+>

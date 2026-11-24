@@ -1,0 +1,33 @@
+<view class="screen compact-farm">
+  <view class="compact-header"><button wx:if="{{!embedded}}" class="secondary small" bindtap="back">{{t.back}}</button><text class="compact-title">{{t.compactFarm}}</text><button class="secondary small compact-rules" bindtap="rules">{{t.compactRules}}</button></view>
+  <view wx:if="{{error}}" class="error">{{error}}</view>
+  <view wx:if="{{farm}}">
+    <view wx:if="{{!farm.config.canEarn}}" class="notice">{{farm.config.phase === 'paused' ? c.paused : c.ended}}</view>
+    <view class="panel pet-panel">
+      <view class="title">{{farm.pet.status === 'hatched' ? c.hero : c.eggTitle}}</view>
+      <view wx:if="{{farm.pet.status !== 'hatched'}}" class="help">{{c.eggIntro}}</view>
+      <view class="habitat scene-{{scene}}" id="pet-center"><view wx:if="{{farm.pet.status !== 'hatched'}}" class="egg {{farm.pet.status === 'incubating' ? 'warming' : ''}}" aria-label="{{c.eggUnclaimed}}" /><image wx:else class="turkey {{bouncing ? 'bounce' : ''}}" bindtap="pet" src="{{farm.wallet.stage === 'baby' ? '/assets/christmas/turkey-baby.webp' : '/assets/christmas/turkey.webp'}}" mode="aspectFit" aria-label="{{c.petInteract}}" /><view class="pet-talk">{{petTalk || (farm.pet.status === 'hatched' ? c.petHint : t.compactStart)}}</view></view>
+      <view wx:if="{{farm.pet.status === 'unclaimed'}}"><button class="full" bindtap="egg" disabled="{{busy || !farm.config.canEarn}}">{{c.claimEgg}}</button></view>
+      <view wx:elif="{{farm.pet.status === 'incubating'}}" class="center"><view>{{hatchRemaining ? hatchText : c.eggReady}}</view><view class="progress"><view class="progress-fill" style="width:{{100 - hatchRemaining / farm.config.hatchSeconds * 100}}%" /></view><button wx:if="{{hatchRemaining === 0}}" class="full" bindtap="hatch" disabled="{{busy}}">{{c.hatchEgg}}</button></view>
+      <view wx:else>
+        <view class="row between"><text>{{c.progress}}</text><text>{{farm.wallet.fed}} / {{farm.config.growthGoal}}</text></view><view class="progress"><view class="progress-fill" style="width:{{farm.wallet.progress}}%" /></view>
+        <view class="wallet"><view><text class="metric">{{farm.wallet.points}}</text><text class="muted">{{c.points}}</text></view><view><text class="metric">{{farm.wallet.feed}}</text><text class="muted">{{c.feed}}</text></view></view>
+        <view class="feed-controls"><input class="feed-amount" type="number" value="{{amount}}" bindinput="amount" aria-label="{{c.quantity}}" /><button class="feed-main" bindtap="feed" disabled="{{busy || !farm.config.canEarn || amount < 1 || amount > farm.wallet.feed || farm.wallet.fed >= farm.config.growthGoal}}">{{farm.wallet.progress >= 100 ? t.compactFinished : t.compactFeed}}</button></view>
+        <view class="exchange-row"><text>{{ratio}}</text><button class="small secondary" bindtap="exchange" disabled="{{busy || !farm.config.canEarn || amount < 1 || amount > canExchange}}">{{t.compactExchange}}</button></view>
+      </view>
+    </view>
+    <view wx:if="{{challenge}}" class="challenge-card {{celebrate ? 'challenge-won' : ''}}">
+      <view class="challenge-cover"><view class="fairy-lights"/><view class="challenge-tags"><text class="holiday-tag">{{t.christmasTag}}</text><text wx:if="{{challenge.badge}}" class="rank-ticket">{{challenge.badge}}</text></view>
+        <view class="challenge-art"><text class="challenge-title">{{t.compactBoard}}</text><image class="challenge-turkey" src="/assets/christmas/turkey-baby.webp" mode="aspectFit"/><text class="star-flight" aria-hidden="true">✦　✧　✦</text></view></view>
+      <view class="challenge-footer"><view class="challenge-hint">{{challenge.hint}}</view>
+        <view class="challenge-actions"><button class="challenge-cta {{challenge.ready ? 'reward-ready' : ''}}" data-action="{{challenge.action}}" bindtap="challengeTap"><text>{{challenge.button}}</text><text class="cta-arrow" aria-hidden="true">›</text></button><button wx:if="{{challenge.secondary}}" class="challenge-link" data-action="{{challenge.secondary.action}}" bindtap="challengeTap">{{challenge.secondary.label}}</button></view></view>
+    </view>
+    <view class="tabs"><button aria-disabled="true">{{c.careTab}}</button><button class="tab-off" bindtap="tasks">{{c.dailyTab}}</button></view>
+    <button class="extras-toggle" bindtap="toggleMore" aria-expanded="{{showMore}}">{{showMore ? t.compactHideMore : t.compactExtras}}</button>
+    <view wx:if="{{showMore}}">
+      <view class="panel"><view class="subtitle">{{c.growthCollection}}</view><view class="choose"><button wx:for="{{scenes}}" wx:key="id" class="choice small {{scene === item.id ? 'active' : ''}}" disabled="{{item.locked}}" data-id="{{item.id}}" bindtap="scene">{{item.label}}</button></view></view>
+      <view class="panel"><view class="subtitle">{{t.compactPrize}}</view><image class="prize" src="/assets/christmas/kit-seara.webp" mode="aspectFit" aria-label="{{c.kitAlt}}" /><view class="help">{{t.compactClaimHint}}</view></view>
+      <view class="panel"><view class="subtitle">{{c.history}}</view><view wx:if="{{!ledger.length}}" class="muted">{{c.empty}}</view><view wx:for="{{ledger}}" wx:key="id" class="player"><text class="grow">{{item.label}}</text><text>{{item.points > 0 ? '+' : ''}}{{item.points}} / {{item.feed > 0 ? '+' : ''}}{{item.feed}} / {{item.fed > 0 ? '+' : ''}}{{item.fed}}</text></view><view class="help">{{c.points}} / {{c.feed}} / {{c.fed}}</view><view class="help">{{quota}}</view></view>
+    </view>
+  </view><button wx:elif="{{error}}" class="full" bindtap="refresh">{{t.retry}}</button><view wx:else class="help">{{t.loading}}</view>
+</view>

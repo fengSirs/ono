@@ -1,0 +1,16 @@
+{
+  "description": "项目配置文件",
+  "packOptions": {
+    "ignore": []
+  },
+  "setting": {},
+  "compileType": "miniprogram",
+  "projectType": 0,
+  "appid": "6af75cf50efc7c0001051c74",
+  "projectname": "ONO-Native",
+  "isGameTourist": false,
+  "isFulljs": false,
+  "buildOption": {
+    "compilerSource": "wx"
+  }
+}

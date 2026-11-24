@@ -1,0 +1,289 @@
+Historical validation before the App ID configuration update.
+
+ONO! FinClip source delivery validation — 2026-11-17
+Node.js v22.14.0; npm 10.9.2; local macOS ARM64
+Command: npm run verify
+Native static checks: 45 files passed (JS/JSON/WXML/events/trilingual references).
+Backend and native-controller automated tests: 53 passed, 0 failed, 0 skipped.
+All HTTP/business tests used isolated temporary SQLite databases.
+Phiz host tests used injected simulated chat and FinClip transports.
+No FinClip Studio/.fap build or real Phiz SDK send was executed; see docs/verification.md.
+No online deployment or existing domain/server changes were performed.
+Clean ZIP checks: all manifest hashes matched; direct startup without node_modules passed.
+Clean npm ci + npm run verify: 53/53 passed.
+
+TAP version 13
+# Subtest: trusted Phiz code exchange maps stable identities, blocks replay, and rejects invalid provider replies
+ok 1 - trusted Phiz code exchange maps stable identities, blocks replay, and rejects invalid provider replies
+  ---
+  duration_ms: 67.327417
+  ...
+# Subtest: Brasília phase boundaries and input validation
+ok 2 - Brasília phase boundaries and input validation
+  ---
+  duration_ms: 3.925833
+  ...
+# Subtest: egg claim, timed hatch, restart persistence and no gifting bypass
+ok 3 - egg claim, timed hatch, restart persistence and no gifting bypass
+  ---
+  duration_ms: 237.0025
+  ...
+# Subtest: friend rooms award 2/3/4-player participation plus a five-point winner bonus
+ok 4 - friend rooms award 2/3/4-player participation plus a five-point winner bonus
+  ---
+  duration_ms: 163.746542
+  ...
+# Subtest: online human/bot games and abandoned rounds never award activity points or daily achievement progress
+ok 5 - online human/bot games and abandoned rounds never award activity points or daily achievement progress
+  ---
+  duration_ms: 141.358458
+  ...
+# Subtest: multi-round participation, crash recovery, cosmetic achievements and phase isolation
+ok 6 - multi-round participation, crash recovery, cosmetic achievements and phase isolation
+  ---
+  duration_ms: 198.19025
+  ...
+# Subtest: wallet safety, growth, private claims and manual stock controls remain intact
+ok 7 - wallet safety, growth, private claims and manual stock controls remain intact
+  ---
+  duration_ms: 435.873583
+  ...
+# Subtest: upgrading an existing grown turkey preserves balances and auto-marks it hatched without re-awarding old rounds
+ok 8 - upgrading an existing grown turkey preserves balances and auto-marks it hatched without re-awarding old rounds
+  ---
+  duration_ms: 95.736292
+  ...
+# Subtest: Phiz task evidence is private; approval grants feed once without UNO, points, or spending
+ok 9 - Phiz task evidence is private; approval grants feed once without UNO, points, or spending
+  ---
+  duration_ms: 399.765292
+  ...
+# Subtest: rejected Phiz evidence can be resubmitted with retained audit, bounded attempts and no unapproved feed
+ok 10 - rejected Phiz evidence can be resubmitted with retained audit, bounded attempts and no unapproved feed
+  ---
+  duration_ms: 257.29925
+  ...
+# Subtest: late task approval remains claimable across daily reset, reward is frozen, and phases stay isolated
+ok 11 - late task approval remains claimable across daily reset, reward is frozen, and phases stay isolated
+  ---
+  duration_ms: 211.495417
+  ...
+# Subtest: operators can correct an unapproved Phiz ID with audit, but cannot change identities after approval
+ok 12 - operators can correct an unapproved Phiz ID with audit, but cannot change identities after approval
+  ---
+  duration_ms: 238.001667
+  ...
+# Subtest: unified game points cap atomically at 100, preserve win standings, survive spending and reset by earning day
+ok 13 - unified game points cap atomically at 100, preserve win standings, survive spending and reset by earning day
+  ---
+  duration_ms: 164.72975
+  ...
+# Subtest: legacy uncredited friend rounds retain participation only, without converting historical UNO scores
+ok 14 - legacy uncredited friend rounds retain participation only, without converting historical UNO scores
+  ---
+  duration_ms: 107.481209
+  ...
+# Subtest: four task submissions racing reserve only two slots and ten feed, with rejection and resubmission respecting the quota
+ok 15 - four task submissions racing reserve only two slots and ten feed, with rejection and resubmission respecting the quota
+  ---
+  duration_ms: 328.415625
+  ...
+# Subtest: task limits follow submission day so late approvals do not consume the new day or allow a third reward
+ok 16 - task limits follow submission day so late approvals do not consume the new day or allow a third reward
+  ---
+  duration_ms: 303.302833
+  ...
+# Subtest: upgrading pre-quota evidence preserves balances, growth and every already-promised task reward
+ok 17 - upgrading pre-quota evidence preserves balances, growth and every already-promised task reward
+  ---
+  duration_ms: 114.363958
+  ...
+# Subtest: 108 unique cards, 7 dealt to each player
+ok 18 - 108 unique cards, 7 dealt to each player
+  ---
+  duration_ms: 2.209584
+  ...
+# Subtest: server rejects out of turn and illegal play
+ok 19 - server rejects out of turn and illegal play
+  ---
+  duration_ms: 0.944875
+  ...
+# Subtest: skip, reverse and +2 apply correct next turn
+ok 20 - skip, reverse and +2 apply correct next turn
+  ---
+  duration_ms: 0.465292
+  ...
+# Subtest: 2-player reverse keeps turn
+ok 21 - 2-player reverse keeps turn
+  ---
+  duration_ms: 0.142416
+  ...
+# Subtest: UNO penalty and declaration
+ok 22 - UNO penalty and declaration
+  ---
+  duration_ms: 1.052708
+  ...
+# Subtest: wild requires color; +4 penalizes next
+ok 23 - wild requires color; +4 penalizes next
+  ---
+  duration_ms: 0.315959
+  ...
+# Subtest: draw only allows new card, pass advances turn
+ok 24 - draw only allows new card, pass advances turn
+  ---
+  duration_ms: 0.238334
+  ...
+# Subtest: private view never exposes opponents hands or deck
+ok 25 - private view never exposes opponents hands or deck
+  ---
+  duration_ms: 0.18875
+  ...
+# Subtest: 100 simulated games finish without invalid bot actions or card loss
+ok 26 - 100 simulated games finish without invalid bot actions or card loss
+  ---
+  duration_ms: 25.456708
+  ...
+# Subtest: draws continuously until a legal card, then preserves the turn
+ok 27 - draws continuously until a legal card, then preserves the turn
+  ---
+  duration_ms: 0.544417
+  ...
+# Subtest: draw stops on a legal wild or matching number; +4 is still validated
+ok 28 - draw stops on a legal wild or matching number; +4 is still validated
+  ---
+  duration_ms: 0.212042
+  ...
+# Subtest: draw recycles discards and safely passes when all cards are held
+ok 29 - draw recycles discards and safely passes when all cards are held
+  ---
+  duration_ms: 0.408916
+  ...
+# Subtest: legacy batches without a requested color keep the last selected color
+ok 30 - legacy batches without a requested color keep the last selected color
+  ---
+  duration_ms: 0.181583
+  ...
+# Subtest: batch applies UNO penalty once and can finish the round
+ok 31 - batch applies UNO penalty once and can finish the round
+  ---
+  duration_ms: 0.10975
+  ...
+# Subtest: rejects illegal, mixed, duplicate and action batches without partial mutation
+ok 32 - rejects illegal, mixed, duplicate and action batches without partial mutation
+  ---
+  duration_ms: 0.512458
+  ...
+# Subtest: drawn number can lead a batch with matching cards already in hand
+ok 33 - drawn number can lead a batch with matching cards already in hand
+  ---
+  duration_ms: 0.07675
+  ...
+# Subtest: mixed-color batches allow either played color and leave a matching card on top
+ok 34 - mixed-color batches allow either played color and leave a matching card on top
+  ---
+  duration_ms: 1.078291
+  ...
+# Subtest: batch colors cannot be chosen from cards not played and rejection does not mutate the game
+ok 35 - batch colors cannot be chosen from cards not played and rejection does not mutate the game
+  ---
+  duration_ms: 0.584625
+  ...
+# Subtest: bots choose a legal batch color even when the remaining hand favors an unavailable color
+ok 36 - bots choose a legal batch color even when the remaining hand favors an unavailable color
+  ---
+  duration_ms: 0.205
+  ...
+# Subtest: public event sequences are unique across repeated draws and rounds
+ok 37 - public event sequences are unique across repeated draws and rounds
+  ---
+  duration_ms: 0.144
+  ...
+# Subtest: official iOS and Android payload shapes normalize to the same invitation
+ok 38 - official iOS and Android payload shapes normalize to the same invitation
+  ---
+  duration_ms: 1.118
+  ...
+# Subtest: friend and group sharing forwards a mini-program card and reports success after delivery receipt
+ok 39 - friend and group sharing forwards a mini-program card and reports success after delivery receipt
+  ---
+  duration_ms: 2.0565
+  ...
+# Subtest: cancel, failed delivery, spoofed app IDs, URLs, paths and expired cards never report success
+ok 40 - cancel, failed delivery, spoofed app IDs, URLs, paths and expired cards never report success
+  ---
+  duration_ms: 1.753209
+  ...
+# Subtest: client access is hashed and expiring; internal session tokens and forged public sessions are rejected
+ok 41 - client access is hashed and expiring; internal session tokens and forged public sessions are rejected
+  ---
+  duration_ms: 146.494833
+  ...
+# Subtest: production refuses incomplete identity configuration; guest login is explicitly gated in development
+ok 42 - production refuses incomplete identity configuration; guest login is explicitly gated in development
+  ---
+  duration_ms: 203.193625
+  ...
+# Subtest: card invite is a room capability, shares a 5:4 PNG, leaks no credentials and joins idempotently
+ok 43 - card invite is a room capability, shares a 5:4 PNG, leaks no credentials and joins idempotently
+  ---
+  duration_ms: 138.089333
+  ...
+# Subtest: last-seat races, other-room membership, expired/closed invites and code reuse are safe
+ok 44 - last-seat races, other-room membership, expired/closed invites and code reuse are safe
+  ---
+  duration_ms: 112.601625
+  ...
+# Subtest: matching defaults to 1v1; queues honor 2/3/4, and fallback fills only the missing seats
+ok 45 - matching defaults to 1v1; queues honor 2/3/4, and fallback fills only the missing seats
+  ---
+  duration_ms: 99.313958
+  ...
+# Subtest: native app handles cold and warm card launches without carrying session credentials
+ok 46 - native app handles cold and warm card launches without carrying session credentials
+  ---
+  duration_ms: 50.668291
+  ...
+# Subtest: share is prepared before a synchronous native onShareAppMessage and expires safely
+ok 47 - share is prepared before a synchronous native onShareAppMessage and expires safely
+  ---
+  duration_ms: 4.949708
+  ...
+# Subtest: mixed colors require choice; cancel preserves cards and explicit Play sends the chosen color
+ok 48 - mixed colors require choice; cancel preserves cards and explicit Play sends the chosen color
+  ---
+  duration_ms: 37.644667
+  ...
+# Subtest: wild cards expose all four colors and stale snapshots never replace newer hands
+ok 49 - wild cards expose all four colors and stale snapshots never replace newer hands
+  ---
+  duration_ms: 3.351333
+  ...
+# Subtest: native campaign client unwraps API snapshots, centers the pet, and stops timers on hide
+ok 50 - native campaign client unwraps API snapshots, centers the pet, and stops timers on hide
+  ---
+  duration_ms: 19.964083
+  ...
+# Subtest: all languages provide every visible page label and dynamic template
+ok 51 - all languages provide every visible page label and dynamic template
+  ---
+  duration_ms: 2.845375
+  ...
+# Subtest: a newly drawn number can lead a same-number batch without selecting an illegal lead
+ok 52 - a newly drawn number can lead a same-number batch without selecting an illegal lead
+  ---
+  duration_ms: 2.210833
+  ...
+# Subtest: room creation retries a random room-code collision without stealing another table
+ok 53 - room creation retries a random room-code collision without stealing another table
+  ---
+  duration_ms: 65.136125
+  ...
+1..53
+# tests 53
+# suites 0
+# pass 53
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 3479.467666

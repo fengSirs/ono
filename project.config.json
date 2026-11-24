@@ -1,0 +1,20 @@
+{
+  "appid": "6af75cf50efc7c0001051c74",
+  "projectname": "ONO-FinClip",
+  "compileType": "miniprogram",
+  "miniprogramRoot": "miniapp/",
+  "setting": {
+    "es6": true,
+    "enhance": true,
+    "minified": true,
+    "postcss": true
+  },
+  "packOptions": {
+    "ignore": [
+      {
+        "type": "suffix",
+        "value": ".ts"
+      }
+    ]
+  }
+}

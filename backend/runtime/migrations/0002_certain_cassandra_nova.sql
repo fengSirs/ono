@@ -1,0 +1,1 @@
+CREATE INDEX `christmas_ledger_wallet_created_idx` ON `christmas_ledger` (`wallet`,`created`);

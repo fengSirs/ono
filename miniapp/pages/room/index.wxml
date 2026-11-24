@@ -1,0 +1,44 @@
+<view class="screen" wx:if="{{room}}"
+  ><view class="header"
+    ><image class="brand-logo" src="/assets/brand/ono-logo.png" mode="aspectFit" aria-label="ONO!" />
+    <text class="pill">{{room.players.length}} / {{room.capacity}}</text></view
+  ><view class="panel center stack"
+    ><view class="muted">{{t.roomNumber}}</view
+    ><view class="code">{{room.code}}</view
+    ><view wx:if="{{room.kind === 'private'}}"
+      ><button class="gold full" open-type="share" disabled="{{!shareReady}}">
+        {{shareReady ? t.inviteCard : t.cardPreparing}}</button
+      ><view class="help">{{t.cardHint}}</view
+      ><button wx:if="{{shareFailed}}" class="secondary full" bindtap="prepare">
+        {{t.cardRetry}}
+      </button></view
+    ><view wx:else
+      ><view class="title">{{t.matchTitle}}</view
+      ><view class="muted">{{t.matchHint}}</view></view
+    ></view
+  ><view class="panel seats"
+    ><view class="seat" wx:for="{{seats}}" wx:key="id"
+      ><view class="avatar {{!item.name ? 'vacant' : ''}}">{{item.name ? item.name[0] : '+'}}</view
+      ><text>{{item.name || t.emptySeat}}</text
+      ><text wx:if="{{item.id === room.host}}" class="pill"
+        >{{t.host}}</text
+      ></view
+    ></view
+  ><view wx:if="{{error}}" class="error">{{error}}</view
+  ><button
+    wx:if="{{room.kind === 'private' && isHost}}"
+    class="full"
+    bindtap="start"
+    disabled="{{busy || room.players.length < 2}}"
+  >
+    {{t.startGame}}</button
+  ><view wx:elif="{{room.kind === 'private'}}" class="notice"
+    >{{t.waitingHost}}</view
+  ><button class="secondary full pad-top" bindtap="leave" disabled="{{busy}}">
+    {{t.leaveRoom}}
+  </button></view
+><view wx:else class="screen"
+  ><view>{{t.loading}}</view
+  ><view wx:if="{{error}}" class="error">{{error}}</view
+  ><button bindtap="refresh">{{t.retry}}</button></view
+>

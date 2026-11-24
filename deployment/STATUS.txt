@@ -1,0 +1,19 @@
+Updated 2026-11-18. DNS AND HTTPS VERIFIED; INDEPENDENT SERVICE DEPLOYED.
+Verified URL: https://ono.phizminiapp.com/
+Server: <SERVER_IP>
+App ID: 6af75cf50efc7c0001051c74
+Service: ono-finclip.service, enabled and active, listening only on 127.0.0.1:4390
+Release: /opt/ono-finclip/releases/20261118-024153-v1.0.1-native
+Data: /var/lib/ono-finclip/ono.sqlite
+Configuration: /etc/ono-finclip.env
+HTTPS vhost: /www/server/panel/vhost/nginx/ono.phizminiapp.com.conf
+DNS: A ono = <SERVER_IP>, TTL 300; authoritative and public resolvers verified.
+HTTP redirects to HTTPS. TLS hostname verification passed; certificate expires 2027-02-16.
+Certbot renewal timer active; existing global deploy hook reloads Nginx on renewal.
+HTTPS root, health, public config, assets and closed-login checks passed publicly.
+Chrome portal visibly reports API online and Phiz login awaiting integration.
+Existing vhost hashes and existing business health checks passed unchanged.
+Native frontend still needs compilation/publication through the Phiz platform.
+AUTH_MODE=pending: health/public config/assets are online; login/game/rewards stay closed
+until the real Phiz identity exchange is configured. Real Phiz chat transport is not verified.
+The browser landing page is a service portal, not a playable H5 replacement.

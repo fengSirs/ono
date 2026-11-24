@@ -1,0 +1,31 @@
+@import "../farm/index.wxss";
+.profile-tools,.profile,.match-options,.hub-heading,.pair,.chips { display:flex; align-items:center; gap:14rpx; }
+.profile-tools { min-width:0; }
+.language,.profile { font-size:24rpx; }
+.profile { padding:0; min-height:80rpx; background:transparent; color:#344a3a; }
+.profile .avatar { width:55rpx; height:55rpx; line-height:55rpx; font-size:24rpx; background:#e3ebce; color:#5d734b; }
+.profile-name { max-width:130rpx; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.hub-heading { justify-content:space-between; }
+.hub-heading .title { margin:0; }
+.people-icon { width:45rpx; height:45rpx; }
+.play-hub .muted { margin:16rpx 0 32rpx; }
+.match-options { flex-wrap:wrap; color:#345941; font-weight:700; font-size:27rpx; }
+.select-box { font-weight:500; background:#f5f6eb; border:2rpx solid #cbd1bd; border-radius:16rpx; padding:12rpx 20rpx; }
+.online { margin:28rpx 0 16rpx; min-height:112rpx; display:flex; justify-content:center; align-items:center; gap:14rpx; }
+.online image { width:40rpx; height:40rpx; }
+.mode-badge { padding:6rpx 12rpx; background:#ffffff22; border:2rpx solid #ffffff33; border-radius:10rpx; font-size:24rpx; }
+.pair { align-items:stretch; }
+.pair button { display:flex; align-items:center; justify-content:center; flex:1; min-width:0; min-height:106rpx; padding:12rpx 10rpx; margin:0; line-height:1.25; text-align:center; }
+.play-hub .notice { margin:26rpx 0; }
+.reward-strip { display:flex; align-items:flex-start; gap:15rpx; padding:28rpx; background:#f4ead1; color:#716339; border:2rpx solid #e3cc9c; border-radius:24rpx; }
+.star { font-size:38rpx; line-height:1; color:#98733d; }
+.chips { flex-wrap:wrap; }
+.tier { font-size:23rpx; font-weight:700; color:#745a38; padding:8rpx 12rpx; background:#fffaf0; border:2rpx solid #e5d6b8; border-radius:10rpx; }
+.lobby .compact-farm { margin-top:28rpx; padding:24rpx; background:#fffaf0; border:2rpx solid #dfcda6; border-radius:28rpx; }
+.lobby .compact-farm .compact-header { margin:0; min-height:0; padding:0; border:none; background:transparent; }
+.turkey-shortcut { position:fixed; bottom:calc(20rpx + env(safe-area-inset-bottom)); right:20rpx; z-index:10; background:transparent; color:#704b25; padding:0; display:flex; flex-direction:column; align-items:center; }
+.turkey-shortcut image { width:90rpx; height:90rpx; background:#fff7dd; border:2rpx solid #d8c294; border-radius:50%; }
+.turkey-shortcut text { border:2rpx solid #dcc693; background:#fff8df; border-radius:40rpx; padding:4rpx 14rpx; font-size:22rpx; }
+.egg-intro { background:#fffaf0; text-align:center; }
+.egg-intro image { height:175rpx; }
+.rules-banner { background:#efefe4; }

@@ -1,0 +1,4 @@
+.seats { display:flex; justify-content:space-around; gap:10rpx; }
+.seat { flex:1; min-width:0; display:flex; align-items:center; flex-direction:column; gap:10rpx; text-align:center; word-break:break-word; font-size:25rpx; }
+.seat .avatar { width:74rpx; height:74rpx; line-height:74rpx; background:#e1ead2; color:#49663f; }
+.seat .vacant { background:#f6f8ee; border:2rpx dashed #b5c69d; color:#859572; }

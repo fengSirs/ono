@@ -1,0 +1,94 @@
+<view class="table" wx:if="{{room}}"
+  ><view class="table-head"
+    ><button class="small secondary" bindtap="home">← {{t.lobby}}</button
+    ><text class="round-label"
+      >{{t.round}} {{room.game.round}}/{{room.game.rounds}}</text
+    ><button class="small secondary" bindtap="sound">
+      {{sound ? '♪' : '♪ ×'}}
+    </button></view
+  ><view class="felt"><view class="opponents"
+    ><view
+      wx:for="{{opponents}}"
+      wx:key="id"
+      class="opponent {{item.active ? 'active-turn' : ''}}"
+      ><view class="seat-icon">{{item.name[0]}}</view><view class="opponent-name">{{item.name}}</view
+      ><view class="opponent-cards">{{item.count}}</view><view class="mini-hand"><view wx:for="{{item.backs}}" wx:key="*this" class="mini-back">O</view></view></view
+    ></view
+  ><view class="board"
+    ><view class="turn-banner {{myTurn ? 'my-turn' : ''}}"
+      >{{myTurn ? t.turn : turnName}} · {{remaining}}s</view
+    ><view class="center-cards"
+      ><view class="deck" bindtap="draw">ONO!</view
+      ><ono-card card="{{top}}" compact="{{true}}" /><view
+        class="color-dot {{room.game.color}}" /></view
+    ><view class="color-caption">{{colorName}}</view></view></view
+  ><view class="hand-zone"
+    ><view class="hand-info"
+      ><text>{{selectedLabel}}</text
+      ><view class="row"
+        ><text bindtap="clear" class="link">{{t.clear}}</text
+        ><text bindtap="sort" class="link">{{t.sort}}</text></view
+      ></view
+    ><scroll-view scroll-x class="hand-scroll" enable-flex="{{true}}"
+      ><view class="hand-line"
+        ><ono-card
+          wx:for="{{hand}}"
+          wx:key="id"
+          card="{{item}}"
+          selected="{{item.selected}}"
+          disabled="{{item.disabled}}"
+          bind:choose="choose" /></view></scroll-view
+    ><view class="inline-error" wx:if="{{error}}">{{error}}</view></view
+  ><view class="game-dock"
+    ><button
+      class="draw-control secondary"
+      bindtap="draw"
+      disabled="{{!myTurn || busy}}"
+    >
+      {{room.game.drawn ? t.pass : t.draw}}</button
+    ><button
+      class="uno-control {{uno ? 'gold' : 'danger'}}"
+      bindtap="uno"
+      disabled="{{!myTurn || busy}}"
+    >
+      UNO!</button
+    ><button
+      class="play-control"
+      bindtap="play"
+      disabled="{{!myTurn || !selected.length || busy}}"
+      loading="{{busy}}"
+    >
+      {{t.play}} →
+    </button></view
+  ><view wx:if="{{room.game.status !== 'playing'}}" class="result-mask"
+    ><scroll-view scroll-y class="result-scroll"
+      ><view class="result-card stack"
+        ><view class="title">{{t.finished}}</view
+        ><view class="winner">{{winnerName}} 🏆</view
+        ><view class="player" wx:for="{{results}}" wx:key="id"
+          ><text class="grow">{{item.name}}</text
+          ><text>{{item.wins}} {{t.wins}}</text></view
+        ><view class="notice" wx:if="{{reward}}">{{reward}}</view
+        ><view wx:if="{{error}}" class="error">{{error}}</view
+        ><button
+          wx:if="{{room.game.status === 'roundOver' && isHost}}"
+          class="full"
+          bindtap="next"
+          disabled="{{busy}}"
+        >
+          {{t.nextRound}}</button
+        ><view wx:elif="{{room.game.status === 'roundOver'}}" class="notice"
+          >{{t.waitingHost}}</view
+        ><button class="gold full" bindtap="farm">{{t.toFarm}} ↗</button
+        ><button class="full" bindtap="home" disabled="{{busy}}">
+          {{t.lobby}} →
+        </button></view
+      ></scroll-view
+    ></view
+  ></view
+><view wx:else class="screen"
+  ><view>{{t.loading}}</view
+  ><view class="error" wx:if="{{error}}">{{error}}</view
+  ><button bindtap="refresh">{{t.retry}}</button
+  ><button class="secondary" bindtap="home">{{t.lobby}}</button></view
+>

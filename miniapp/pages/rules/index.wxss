@@ -1,0 +1,2 @@
+.rule-row { display:flex; gap:18rpx; padding:20rpx 0; line-height:1.65; border-top:2rpx solid #e7e1cf; }
+.rule-num { flex:none; color:#526d48; background:#edf2e2; width:44rpx; height:44rpx; text-align:center; border-radius:50%; font-weight:700; }

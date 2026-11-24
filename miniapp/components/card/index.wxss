@@ -1,0 +1,121 @@
+:host {
+  display: inline-block;
+  vertical-align: bottom;
+}
+.card {
+  position: relative;
+  width: 124rpx;
+  height: 182rpx;
+  border: 6rpx solid #fff;
+  border-radius: 18rpx;
+  color: #fff;
+  box-shadow: 0 4rpx 8rpx #0004;
+  margin: 20rpx 6rpx 10rpx;
+  background: #213f34;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+.red {
+  background: #be3548;
+}
+.yellow {
+  background: #dfa517;
+  color: #302313;
+}
+.green {
+  background: #278657;
+}
+.blue {
+  background: #267bc1;
+}
+.wild {
+  background: #27283a;
+}
+.oval {
+  position: absolute;
+  inset: 25rpx 7rpx;
+  border: 3rpx solid #fffd;
+  border-radius: 50%;
+  transform: rotate(23deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.face {
+  font-size: 48rpx;
+  font-weight: 900;
+  transform: rotate(-23deg);
+  line-height: 1;
+}
+.corner {
+  position: absolute;
+  left: 8rpx;
+  top: 3rpx;
+  font-size: 23rpx;
+  font-weight: 800;
+}
+.bottom {
+  left: auto;
+  top: auto;
+  right: 8rpx;
+  bottom: 3rpx;
+  transform: rotate(180deg);
+}
+.selected {
+  transform: translateY(-18rpx);
+  box-shadow:
+    0 0 0 6rpx #f7ce5e,
+    0 12rpx 16rpx #0004;
+}
+.dim {
+  opacity: 0.55;
+}
+.compact {
+  width: 110rpx;
+  height: 160rpx;
+  margin: 0;
+}
+.compact .face {
+  font-size: 42rpx;
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .card {
+    width: 68px;
+    height: 96px;
+    margin: 14px 4px 4px;
+    border-width: 3px;
+    border-radius: 9px;
+  }
+  .card.compact {
+    width: 62px;
+    height: 90px;
+    margin: 0;
+  }
+  .oval {
+    inset: 14px 4px;
+    border-width: 2px;
+  }
+  .face,
+  .compact .face {
+    font-size: 28px;
+  }
+  .corner {
+    font-size: 13px;
+    left: 4px;
+    top: 0;
+  }
+  .corner.bottom {
+    left: auto;
+    top: auto;
+    right: 4px;
+    bottom: 0;
+  }
+  .selected {
+    transform: translateY(-9px);
+    box-shadow:
+      0 0 0 3px #f7ce5e,
+      0 6px 8px #0004;
+  }
+}
+.red { background:#e85e51; } .yellow { background:#e8b83d; } .green { background:#458966; } .blue { background:#4e80c3; } .wild { background:#293c33; }
