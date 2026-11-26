@@ -53,6 +53,17 @@ test("trusted Phiz code exchange maps stable identities, blocks replay, and reje
       auth.login({ name: "Ana", code: "code-0003" }, core, { mode: "finclip" }),
       /loginFailed/,
     );
+
+    // Failed provider exchange releases the one-time code for a retry.
+    subject = "phiz-id-1";
+    const recovered = await auth.login(
+      { name: "Changed", code: "code-0003" },
+      core,
+      { mode: "finclip" },
+    );
+    assert.equal(recovered.id, a.id);
+    assert.equal(recovered.name, "Ana");
+
     replyStatus = 403;
     await assert.rejects(
       auth.login({ name: "Ana", code: "code-0004" }, core, { mode: "finclip" }),

@@ -166,11 +166,18 @@ async function exchangeIdentity(provider, code) {
         }
       : {}),
   });
-  if (!res.ok) fail("loginFailed");
+  if (!res.ok)
+    throw Object.assign(Error("loginFailed"), {
+      reason: "providerRejected",
+      providerStatus: res.status,
+    });
   const payload = await res.json();
   if (provider.kind === "phiz") {
     const openId = openIdFrom(payload);
-    if (!openId) fail("loginFailed");
+    if (!openId)
+      throw Object.assign(Error("loginFailed"), {
+        reason: "providerIdentityMissing",
+      });
     return { subject: openId };
   }
   return payload;
@@ -204,7 +211,19 @@ export async function login(body, core, { mode = "guest" } = {}) {
   let identity;
   try {
     identity = await exchangeIdentity(provider, code);
-  } catch {
+  } catch (error) {
+    // A one-time auth code must not remain reserved when the provider did not
+    // complete identity exchange. Otherwise the user's next attempt with the
+    // same host code turns a useful provider failure into a confusing 409.
+    await env.DB.prepare("DELETE FROM mini_auth_codes WHERE hash=?")
+      .bind(codeKey)
+      .run();
+    console.warn(
+      "[auth] identity exchange failed",
+      provider.kind,
+      (error && error.reason) || "exchangeError",
+      (error && error.providerStatus) || "",
+    );
     fail("loginFailed");
   }
   if (
@@ -212,7 +231,12 @@ export async function login(body, core, { mode = "guest" } = {}) {
     !identity.subject.trim() ||
     identity.subject.length > 200
   )
+  {
+    await env.DB.prepare("DELETE FROM mini_auth_codes WHERE hash=?")
+      .bind(codeKey)
+      .run();
     fail("loginFailed");
+  }
   const issuer = "phiz:" + provider.appId;
   const linked = await withIdentityLock(issuer + ":" + identity.subject, async () => {
     let player = await env.DB.prepare(

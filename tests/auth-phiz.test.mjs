@@ -72,6 +72,15 @@ test("Phiz OpenId exchanges the Developer AppSecret for a stable openId", async 
       /loginFailed/,
     );
 
+    // Provider failure must release the reserved code so the host's still-valid
+    // one-time code is not poisoned into a permanent 409 replay error.
+    reply = { openId: "phiz-openid-1" };
+    const recovered = await auth.login({ name: "Changed", code: "code-0003" }, core, {
+      mode: "finclip",
+    });
+    assert.equal(recovered.id, a.id);
+    assert.equal(recovered.name, "Ana");
+
     reply = { code: 0, data: { sessionKey: "missing-openid" } };
     await assert.rejects(
       auth.login({ name: "Ana", code: "code-0004" }, core, {
