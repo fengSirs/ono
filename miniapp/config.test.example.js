@@ -1,6 +1,6 @@
 module.exports = {
-  apiBase: "http://192.168.18.63:4390",
-  appId: "6a4b4e21c1b24700013b596f",
+  apiBase: "https://ono.phizminiapp.com",
+  appId: "6af733830efc7c0001051c6a",
   authMode: "finclip",
   pollMs: 1200,
   requestTimeout: 15000,
