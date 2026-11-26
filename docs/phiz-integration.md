@@ -89,7 +89,7 @@ shareAppMessage(appInfo: String, bitmap: Bitmap?, callback: IAppletCallback)
 
 ## 必需联调资料
 
-App ID 已配置为 `6af733830efc7c0001051c6a`（来自用户提供，需在平台核对它对应 ONO! 小程序）。仍需 SDK 版本、Phiz 聊天消息类型与会话选择器接口、FinClip SDK 打开小程序的方法、Phiz 的登录 code 校验接口，以及测试好友/群聊。包内已提供可测试的适配协议与实现；实际 Phiz SDK 发送未验收。
+App ID 已配置为 `6af733830efc7c0001051c6a`（来自用户提供，需在平台核对它对应 ONO! 小程序）。登录使用原生 `pz.login`，首次展示名使用 `pz.getPhizUserInfo.username`；服务端按 `GET https://admin.phiz.chat/api/3.0/token/getOpenId` 交换 OpenId（`PHIZ_OPEN_BASE_URL` + `PHIZ_APP_SECRET`）。已有账号昵称以后端 `sessions.name` 为准。仍需 SDK 版本、Phiz 聊天消息类型与会话选择器接口、FinClip SDK 打开小程序的方法，以及测试好友/群聊。包内已提供可测试的适配协议与实现；实际 Phiz SDK 发送未验收。
 
 ## 官方依据
 

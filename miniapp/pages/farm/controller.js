@@ -3,10 +3,12 @@ const ui = require("../../utils/page"),
   p = require("../../utils/platform"),
   poll = require("../../utils/poller"),
   words = require("../../utils/labels"),
+  features = require("../../utils/features"),
   audio = require("../../utils/audio");
 module.exports = {
   data: {
     farm: null,
+    features: features,
     showMore: true,
     error: "",
     busy: false,
@@ -64,7 +66,7 @@ module.exports = {
     var lang = getApp().globalData.lang;
     var board=f.weekly, key=board && f.config.id+':'+board.week;
     var name=this._firstWeek===key ? this._firstName : '';
-    if(board && !board.own && board.remaining>0 && board.completed>0 && !name && this._leaderPending!==key && Date.now()>=(this._leaderRetry||0)) {
+    if(features.leaderboard && board && !board.own && board.remaining>0 && board.completed>0 && !name && this._leaderPending!==key && Date.now()>=(this._leaderRetry||0)) {
       this._leaderPending=key;
       client.game({op:'christmasLeaderboard',week:board.week}).then(function(r){
         var first=r.leaderboard.entries[0], latest=self.data.farm;
@@ -74,7 +76,7 @@ module.exports = {
         }
       }).catch(function(){self._leaderRetry=Date.now()+30000;}).finally(function(){if(self._leaderPending===key)self._leaderPending=null;});
     }
-    var s = Number(p.api().getStorageSync("ono.scene." + f.config.id) || 0),
+    var s = Number(p.storage.get("ono.scene." + f.config.id) || 0),
       unlocked = Math.min(
         4,
         [0, 0.1, 0.25, 0.5, 1].filter(function (n) {
@@ -85,7 +87,7 @@ module.exports = {
     this.setData(
       {
         farm: f,
-        challenge: require('../../utils/weekly').challenge(f,lang,name),
+        challenge: features.leaderboard ? require('../../utils/weekly').challenge(f,lang,name) : null,
         rewardRule: words.t(lang,'friendsPointsRule',{bonus:f.config.winBonus,cap:f.config.gameDailyCap}),
         rewardTiers: (f.config.friendRewards || []).map(function(points,index){return words.t(lang,'roomRewardTier',{count:index+2,points:points});}),
         weeklyView: require("../../utils/weekly").view(f.weekly, lang, !!f.claim),
@@ -150,17 +152,14 @@ module.exports = {
   centerPet: function () {
     if (!this.focus || !this.data.farm || !this._visible) return;
     var self = this,
-      api = p.api(),
-      q = api.createSelectorQuery(),
-      height = (
-        api.getWindowInfo ? api.getWindowInfo() : api.getSystemInfoSync()
-      ).windowHeight;
+      q = p.createSelectorQuery(),
+      height = p.windowInfo().windowHeight;
     q.select("#pet-center").boundingClientRect();
     q.selectViewport().scrollOffset();
     q.exec(function (r) {
       if (r[0] && self.focus && self._visible) {
         self.focus = false;
-        api.pageScrollTo({
+        p.pageScrollTo({
           scrollTop: Math.max(
             0,
             r[1].scrollTop + r[0].top - (height - r[0].height) / 2,
@@ -230,35 +229,37 @@ module.exports = {
     var n = Number(e.currentTarget.dataset.id);
     if (this.data.scenes[n].locked) return;
     this.setData({ scene: n });
-    p.api().setStorageSync("ono.scene." + this.data.farm.config.id, n);
+    p.storage.set("ono.scene." + this.data.farm.config.id, n);
     audio.play("tap");
   },
   tasks: function () {
-    p.api().navigateTo({ url: "/pages/tasks/index" });
+    p.navigateTo({ url: "/pages/tasks/index" });
   },
   toggleMore: function () {
     this.setData({ showMore: !this.data.showMore });
   },
   leaderboard: function () {
-    p.api().navigateTo({ url: "/pages/leaderboard/index" });
+    if (!features.leaderboard) return;
+    p.navigateTo({ url: "/pages/leaderboard/index" });
   },
   challengeTap: function (e) {
     var card=this.data.challenge;
     if(!card)return;
     var action=(e && e.currentTarget && e.currentTarget.dataset && e.currentTarget.dataset.action) || card.action;
     if(action==='grow'){this.focus=true;this.centerPet();}
-    else if(action==='claim')this.claim();
-    else {var own=this.data.farm.weekly.own; p.api().navigateTo({url:'/pages/leaderboard/index'+(own && own.week && own.week!==this.data.farm.weekly.week ? '?week='+encodeURIComponent(own.week) : '')});}
+    else if(action==='claim'){ if (features.prize) this.claim(); }
+    else if(features.leaderboard){var own=this.data.farm.weekly.own; p.navigateTo({url:'/pages/leaderboard/index'+(own && own.week && own.week!==this.data.farm.weekly.week ? '?week='+encodeURIComponent(own.week) : '')});}
   },
   claim: function () {
-    p.api().navigateTo({ url: "/pages/claim/index" });
+    if (!features.prize) return;
+    p.navigateTo({ url: "/pages/claim/index" });
   },
   rules: function () {
-    p.api().navigateTo({ url: "/pages/rules/index" });
+    p.navigateTo({ url: "/pages/rules/index" });
   },
   back: function () {
     var pages = getCurrentPages();
-    if (pages.length > 1) p.api().navigateBack();
+    if (pages.length > 1) p.navigateBack();
     else getApp().home();
   },
 };

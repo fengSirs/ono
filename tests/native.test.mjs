@@ -1,7 +1,11 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { createRequire } from "node:module";
 import { native, flush } from "./native-harness.mjs";
+const require = createRequire(import.meta.url);
+const cfg = require("../miniapp/config.js");
 const token = "a".repeat(48);
+const apiBase = cfg.apiBase.replace(/\/$/, "");
 function sample() {
   return {
     room: {
@@ -48,7 +52,7 @@ function sample() {
   };
 }
 test("native app handles cold and warm card launches without carrying session credentials", async () => {
-  const n = native();
+  const n = native({autoLogin:false});
   try {
     n.app.captureLaunch({ query: { token } });
     const lobby = n.page("lobby");
@@ -85,8 +89,275 @@ test("native app handles cold and warm card launches without carrying session cr
     n.dispose();
   }
 });
+test("native Phiz login unwraps pz.login result.code before sending it to the API", async () => {
+  const n = native({ provider: "pz", autoLogin: false });
+  try {
+    n.respond((o) => {
+      assert.equal(o.url, apiBase + "/v1/auth/finclip");
+      assert.equal(o.data.code, "pz-test-code");
+      assert.equal(o.data.name, "Phiz Tester");
+      return {
+        session: {
+          id: "u",
+          name: "Ana",
+          token: "sample",
+          expires: Date.now() + 60000,
+        },
+      };
+    });
+    const session = await n.app.ensureSession("Ana");
+    assert.equal(session.id, "u");
+    assert.equal(session.name, "Ana");
+    assert.equal(n.calls.filter((call) => call.type === "login").length, 1);
+    assert.equal(typeof n.pz.request, "undefined");
+  } finally {
+    n.dispose();
+  }
+});
+test("native login falls back to ft.login when pz.login is unavailable", async () => {
+  const n = native({autoLogin:false});
+  try {
+    const result = await n.load("utils/platform").login();
+    assert.equal(result.code, "test-code");
+    assert.deepEqual(
+      n.calls.filter((call) => call.type === "login").map((call) => call.provider),
+      ["ft"],
+    );
+  } finally {
+    n.dispose();
+  }
+});
+test("lobby exposes a login failure and retry recovers", async () => {
+  const n = native({provider: "pz", autoLogin:false});
+  try {
+    const page = n.page("lobby");
+    n.app.globalData.lang = "en";
+    n.pages.push(page);
+    n.respond(function () { return { error: "loginFailed" }; });
+    page.onLoad();
+    page.onShow();
+    await flush();
+    assert.equal(page.data.authenticating, false);
+    assert.equal(page.data.authError, "Phiz sign-in failed.");
+    n.respond(function () {
+      return { session: { id: "u", name: "Ana", token: "sample", expires: Date.now() + 60000 } };
+    });
+    page.retryAuth();
+    await flush();
+    assert.equal(page.data.signedIn, true);
+    assert.equal(page.data.authError, "");
+    assert.equal(page.data.name, "Ana");
+  } finally {
+    n.dispose();
+  }
+});
+test("nickname save updates the server identity before local storage", async () => {
+  const n = native({autoLogin:false});
+  try {
+    n.app.globalData.session = {
+      id: "u",
+      name: "Ana",
+      token: "sample",
+      expires: Date.now() + 60000,
+    };
+    const page = n.page("lobby");
+    page.onLoad();
+    n.respond((o) => {
+      assert.equal(o.url, apiBase + "/v1/game");
+      assert.equal(o.data.op, "rename");
+      assert.equal(o.data.name, "Beatriz");
+      return { name: "Beatriz" };
+    });
+    page.showModal({ currentTarget: { dataset: { modal: "name" } } });
+    page.nameInput({ detail: { value: "Beatriz" } });
+    page.save();
+    await flush();
+    assert.equal(page.data.name, "Beatriz");
+    assert.equal(n.app.globalData.session.name, "Beatriz");
+    assert.equal(n.storage["ono.name"], "Beatriz");
+    assert.equal(page.data.error, "");
+    assert.equal(page.data.busy, false);
+  } finally {
+    n.dispose();
+  }
+});
+test("launch refreshes the server nickname before using local cache", async () => {
+  const n = native({ autoLogin: false });
+  try {
+    n.app.globalData.session = {
+      id: "u",
+      name: "Cached Name",
+      token: "sample",
+      expires: Date.now() + 60000,
+    };
+    n.load("utils/client").setToken("sample");
+    n.storage["ono.name"] = "Cached Name";
+    n.respond((o) => {
+      assert.equal(o.url, apiBase + "/v1/game");
+      assert.equal(o.data.op, "profile");
+      return { id: "u", name: "Server Name" };
+    });
+    await n.app.refreshProfile();
+    assert.equal(n.app.globalData.session.name, "Server Name");
+    assert.equal(n.storage["ono.name"], "Server Name");
+  } finally {
+    n.dispose();
+  }
+});
+test("app launch silently logs in with the Phiz username", async () => {
+  const n = native({
+    provider: "pz",
+    autoLogin: true,
+    phizUser: { userId: "phiz-user-1", username: "Phiz Ana" },
+  });
+  try {
+    n.respond((o) => {
+      if (o.url.endsWith("/v1/auth/finclip")) {
+        assert.equal(o.data.name, "Phiz Ana");
+        return {
+          session: {
+            id: "stable-account",
+            name: "Phiz Ana",
+            token: "sample",
+            expires: Date.now() + 60000,
+          },
+        };
+      }
+      assert.equal(o.data.op, "profile");
+      return { id: "stable-account", name: "Server Phiz Ana" };
+    });
+    await flush();
+    assert.equal(n.app.globalData.session.id, "stable-account");
+    assert.equal(n.app.globalData.session.name, "Server Phiz Ana");
+    assert.equal(n.storage["ono.name"], "Server Phiz Ana");
+    assert.equal(n.calls.filter((call) => call.type === "login").length, 1);
+    assert.equal(n.calls.filter((call) => call.type === "profile").length, 1);
+  } finally {
+    n.dispose();
+  }
+});
+test("invalid native response bodies reject safely without crashing the renderer", async () => {
+  const n = native({provider: "pz", autoLogin:false});
+  try {
+    const client = n.load("utils/client");
+    n.respond(() => null);
+    await assert.rejects(
+      client.request("/v1/game", "POST", { op: "rename" }),
+      Error("serviceUnavailable"),
+    );
+    n.respond(() => []);
+    await assert.rejects(
+      client.request("/v1/game", "POST", { op: "rename" }),
+      Error("serviceUnavailable"),
+    );
+    n.respond(() => "gateway timeout");
+    await assert.rejects(
+      client.request("/v1/game", "POST", { op: "rename" }),
+      Error("serviceUnavailable"),
+    );
+  } finally {
+    n.dispose();
+  }
+});
+test("task form prefills the current Phiz ID without overriding server or manual values", async () => {
+  const n = native({
+    provider: "pz",
+    autoLogin: false,
+    phizUser: {
+      userId: "auto-phiz-id-0123456789012345678901234567890123456789",
+      username: "Phiz Ana",
+    },
+  });
+  try {
+    n.app.globalData.session = {
+      id: "stable-account",
+      name: "Phiz Ana",
+      token: "sample",
+      expires: Date.now() + 60000,
+    };
+    n.load("utils/client").setToken("sample");
+    const page = n.page("tasks");
+    n.pages.push(page);
+    page._visible = true;
+    n.respond(() => ({
+      config: { taskDailyFeedCap: 20 },
+      feedTasks: {
+        tasks: [],
+        history: [],
+        profile: null,
+        limit: 2,
+        quota: { remaining: 2 },
+      },
+    }));
+    page.onShow();
+    await flush();
+    assert.equal(
+      page.data.phizId,
+      "auto-phiz-id-0123456789012345678901234567890123456789",
+    );
+    assert.equal(page.data.profileLocked, false);
+
+    page.data.profileLocked = true;
+    page.data.phizId = "server-phiz-id";
+    await page.autoFillPhizId();
+    assert.equal(page.data.phizId, "server-phiz-id");
+
+    page.data.profileLocked = false;
+    page.data.phizId = "manually-typed-id";
+    await page.autoFillPhizId();
+    assert.equal(page.data.phizId, "manually-typed-id");
+    assert.equal(n.calls.filter((call) => call.type === "profile").length, 1);
+  } finally {
+    n.dispose();
+  }
+});
+test("task form waits for Phiz login before reading the real UserID", async () => {
+  const n = native({
+    provider: "pz",
+    autoLogin: true,
+    phizUser: { userId: "real-phiz-user-id" },
+  });
+  try {
+    n.respond((o) => {
+      if (o.url.endsWith("/v1/auth/finclip")) {
+        return {
+          session: {
+            id: "stable-account",
+            name: "Ana",
+            token: "sample",
+            expires: Date.now() + 60000,
+          },
+        };
+      }
+      if (o.data && o.data.op === "profile")
+        return { id: "stable-account", name: "Ana" };
+      return {
+        config: { taskDailyFeedCap: 20 },
+        feedTasks: {
+          tasks: [],
+          history: [],
+          profile: null,
+          limit: 2,
+          quota: { remaining: 2 },
+        },
+      };
+    });
+    const page = n.page("tasks");
+    n.pages.push(page);
+    page._visible = true;
+    page.onShow();
+    await flush();
+    await flush();
+    assert.equal(n.app.globalData.session.id, "stable-account");
+    assert.equal(page.data.phizId, "real-phiz-user-id");
+    assert.equal(n.calls.filter((call) => call.type === "login").length, 1);
+    assert.equal(n.calls.filter((call) => call.type === "profile").length, 1);
+  } finally {
+    n.dispose();
+  }
+});
 test("share is prepared before a synchronous native onShareAppMessage and expires safely", async () => {
-  const n = native();
+  const n = native({autoLogin:false});
   try {
     n.app.globalData.session = { id: "me" };
     const page = n.page("room");
@@ -121,7 +392,7 @@ test("share is prepared before a synchronous native onShareAppMessage and expire
   }
 });
 test("mixed colors require choice; cancel preserves cards and explicit Play sends the chosen color", async () => {
-  const n = native();
+  const n = native({autoLogin:false});
   try {
     n.app.globalData.session = { id: "me" };
     const page = n.page("game");
@@ -155,7 +426,7 @@ test("mixed colors require choice; cancel preserves cards and explicit Play send
   }
 });
 test("wild cards expose all four colors and stale snapshots never replace newer hands", () => {
-  const n = native();
+  const n = native({autoLogin:false});
   try {
     const cards = n.load("utils/cards");
     assert.deepEqual(
@@ -176,7 +447,7 @@ test("wild cards expose all four colors and stale snapshots never replace newer 
   }
 });
 test("native campaign client unwraps API snapshots, centers the pet, and stops timers on hide", async () => {
-  const n = native();
+  const n = native({autoLogin:false});
   try {
     n.app.globalData.session = { id: "me" };
     const page = n.page("farm");
@@ -207,8 +478,8 @@ test("native campaign client unwraps API snapshots, centers the pet, and stops t
     n.dispose();
   }
 });
-test("lobby name prompt preserves room settings and returns to the create dialog", async () => {
-  const n = native();
+test("auto sign-in preserves room settings and does not prompt for a nickname", async () => {
+  const n = native({provider: "pz", autoLogin:false});
   try {
     const page = n.page('lobby');
     page.onLoad();
@@ -217,10 +488,8 @@ test("lobby name prompt preserves room settings and returns to the create dialog
     page.showModal({currentTarget:{dataset:{modal:'create'}}});
     page.select({currentTarget:{dataset:{field:'capacity',value:3}}});
     page.enter({currentTarget:{dataset:{op:'create'}}});
-    assert.equal(page.data.modal,'name');
-    page.nameInput({detail:{value:'Ana'}});
-    page.save();
     await flush();
+    assert.equal(page.data.authenticating,false);
     assert.equal(page.data.modal,'create');
     assert.equal(page.data.capacity,3);
     assert.equal(page.data.signedIn,true);
@@ -230,7 +499,7 @@ test("lobby name prompt preserves room settings and returns to the create dialog
   } finally {n.dispose();}
 });
 test('signed-in lobby loads the farm and uses server quotas and reward tiers', async () => {
-  const n = native();
+  const n = native({autoLogin:false});
   try {
     n.app.globalData.session = {id:'u', name:'Ana'};
     const page = n.page('lobby');
@@ -245,7 +514,7 @@ test('signed-in lobby loads the farm and uses server quotas and reward tiers', a
   } finally {n.dispose();}
 });
 test("all languages provide every visible page label and dynamic template", () => {
-  const n = native();
+  const n = native({autoLogin:false});
   try {
     const labels = n.load("utils/labels");
     for (const lang of ["pt", "en", "zh"]) {
@@ -288,7 +557,7 @@ test("all languages provide every visible page label and dynamic template", () =
 });
 
 test("a newly drawn number can lead a same-number batch without selecting an illegal lead", () => {
-  const n = native();
+  const n = native({autoLogin:false});
   try {
     const cards = n.load("utils/cards");
     const hand = [

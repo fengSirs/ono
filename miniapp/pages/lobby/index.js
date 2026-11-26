@@ -1,10 +1,12 @@
 const ui = require("../../utils/page"),
   client = require("../../utils/client"),
   p = require("../../utils/platform"),
+  features = require("../../utils/features"),
   activity = require('../farm/controller'), words = require('../../utils/labels');
 Page(Object.assign({}, activity, {
   data: Object.assign({},activity.data,{
-    embedded: true, modal: '', draftName: '',
+    embedded: true, modal: '', draftName: '', authenticating: false, authError: '',
+    features: features,
     name: "",
     code: "",
     size: 2,
@@ -21,7 +23,7 @@ Page(Object.assign({}, activity, {
     this.setData({
       name:
         (getApp().globalData.session || {}).name ||
-        p.api().getStorageSync("ono.name") ||
+        p.storage.get("ono.name") ||
         "",
     });
   },
@@ -31,7 +33,7 @@ Page(Object.assign({}, activity, {
     var token = app.globalData.pendingInvite;
     if (token) {
       app.globalData.pendingInvite = null;
-      p.api().navigateTo({
+      p.navigateTo({
         url: "/pages/invite/index?token=" + token,
         fail: function () {
           app.globalData.pendingInvite = token;
@@ -39,14 +41,53 @@ Page(Object.assign({}, activity, {
       });
       return;
     }
-    var saved = p.api().getStorageSync("ono.room");
+    var saved = p.storage.get("ono.room");
     this.setData({ savedRoom: saved || '', signedIn: !!app.globalData.session });
     this.updateSizes();
     if (this.data.signedIn) activity.onShow.call(this);
     else {
       var self = this;
       client.request('/v1/campaign').then(function(result){self.publicConfig = result.config;self.updateSizes();}).catch(function(){});
+      this.syncAuth().catch(function () {});
     }
+  },
+  syncAuth: function () {
+    var self = this,
+      auth = getApp().ensureSession();
+    if (!auth || this.data.signedIn) return Promise.resolve();
+    this.setData({ authenticating: true });
+    return auth.then(function (session) {
+      if (getCurrentPages().slice(-1)[0] !== self) return session;
+      self.setData({
+        authenticating: false,
+        signedIn: true,
+        authError: '',
+        name: session.name,
+        draftName: self.data.draftName || session.name,
+      });
+      if (!self.data.modal) activity.onShow.call(self);
+      return session;
+    }).catch(function (error) {
+      if (getCurrentPages().slice(-1)[0] === self) {
+        var key = error.message || 'loginFailed',
+          message = words.t(getApp().globalData.lang, key);
+        if (message === key) message = words.t(getApp().globalData.lang, 'loginFailed');
+        self.setData({ authenticating: false, authError: message, error: '' });
+      }
+      throw error;
+    });
+  },
+  retryAuth: function () {
+    if (this.data.authenticating) return;
+    this.setData({ authError: '' });
+    this.syncAuth().catch(function () {});
+  },
+  onServerProfile: function (profile) {
+    if (!profile || !profile.name || !this.data.signedIn) return;
+    this.setData({
+      name: profile.name,
+      draftName: this.data.draftName || profile.name,
+    });
   },
   updateSizes: function () {
     var lang=this.data.lang, config=this.publicConfig, next={sizeLabels:this.data.sizes.map(function(count){return words.t(lang,count===2?'matchDuel':'matchSizeLabel',{count:count});})};
@@ -58,11 +99,21 @@ Page(Object.assign({}, activity, {
     if (error.message === 'sessionExpired') {
       activity.onHide.call(this);
       getApp().clearSession();
-      this.setData({signedIn:false,farm:null,quota:'',modal:'name',draftName:this.data.name});
+      this.setData({signedIn:false,farm:null,quota:'',modal:''});
+      this.syncAuth().catch(function () {});
+      error.message = 'reconnecting';
     }
     ui.fail(this,error);
   },
-  showModal: function(e){ this.setData({modal:e.currentTarget.dataset.modal,draftName:this.data.name,error:''}); },
+  showModal: function(e){
+    var modal = e.currentTarget.dataset.modal;
+    if (modal === 'name' && !this.data.signedIn) {
+      if (this.data.authenticating) return;
+      this.syncAuth().catch(function () {});
+      return;
+    }
+    this.setData({modal:modal,draftName:this.data.name,error:''});
+  },
   closeModal: function(){ if(!this.data.busy){this.returnTo='';this.setData({modal:'',error:''});} },
   matchSize: function(e){this.setData({size:this.data.sizes[Number(e.detail.value)]});},
   changeLang: function (e) {
@@ -84,15 +135,8 @@ Page(Object.assign({}, activity, {
     var self = this;
     ui.busy(this, function () {
       return getApp()
-        .ensureSession(self.data.draftName)
-        .then(function () {
-          return client.game({ op: "rename", name: self.data.draftName });
-        })
+        .rename(self.data.draftName)
         .then(function (r) {
-          var app = getApp();
-          app.globalData.session.name = r.name;
-          p.api().setStorageSync("ono.session", app.globalData.session);
-          p.api().setStorageSync("ono.name", r.name);
           var first = !self.data.signedIn;
           self.setData({ name: r.name, modal:self.returnTo || '', signedIn:true });
           self.returnTo='';
@@ -101,11 +145,15 @@ Page(Object.assign({}, activity, {
     });
   },
   enter: function (e) {
-    if (!this.data.signedIn && !this.data.name) { this.returnTo=this.data.modal;this.setData({modal:'name'}); return; }
+    if (!this.data.signedIn) {
+      if (this.data.authenticating) return;
+      this.syncAuth().catch(function () {});
+      return;
+    }
     var self = this;
     ui.busy(this, function () {
       return getApp()
-        .ensureSession(self.data.name)
+        .ensureSession()
         .then(function () {
           var op = e.currentTarget.dataset.op;
           return client.game(
@@ -128,7 +176,7 @@ Page(Object.assign({}, activity, {
     var self = this;
     ui.busy(this, function () {
       return getApp()
-        .ensureSession(self.data.name)
+        .ensureSession()
         .then(function () {
           return client.game({ op: "state", room: self.data.savedRoom });
         })
@@ -147,21 +195,26 @@ Page(Object.assign({}, activity, {
     });
   },
   farm: function () {
-    if (!this.data.signedIn) {this.setData({modal:'name'});return;}
+    if (this.data.authenticating) return;
+    if (!this.data.signedIn) {
+      this.syncAuth().catch(function () {});
+      return;
+    }
     if(this.data.farm){this.focus=true;this.centerPet();return;}
     var self = this;
     ui.busy(this, function () {
       return getApp()
-        .ensureSession(self.data.name)
+        .ensureSession()
         .then(function () {
-          p.api().navigateTo({ url: "/pages/farm/index?focus=pet" });
+          p.navigateTo({ url: "/pages/farm/index?focus=pet" });
         });
     });
   },
   rules: function () {
-    p.api().navigateTo({ url: "/pages/rules/index" });
+    p.navigateTo({ url: "/pages/rules/index" });
   },
   leaderboard: function () {
-    p.api().navigateTo({ url: "/pages/leaderboard/index" });
+    if (!features.leaderboard) return;
+    p.navigateTo({ url: "/pages/leaderboard/index" });
   },
 }));

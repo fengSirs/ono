@@ -4,7 +4,12 @@ import { resolve, dirname, extname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { env, closeDatabase, databaseHealth } from "./db.mjs";
 import { POST } from "./game-controller.mjs";
-import { initAuth, requireAuth, login } from "./auth.mjs";
+import {
+  initAuth,
+  requireAuth,
+  login,
+  authProviderConfigured,
+} from "./auth.mjs";
 import {
   initInvitations,
   createInvitation,
@@ -16,7 +21,7 @@ import { shareCover } from "./share-cover.mjs";
 const prod = process.env.NODE_ENV === "production";
 const authMode = process.env.AUTH_MODE || "finclip";
 if (!["finclip", "pending"].includes(authMode)) throw Error("Invalid AUTH_MODE");
-const identityConfigured = Boolean(process.env.AUTH_EXCHANGE_URL?.startsWith("https://") && process.env.AUTH_EXCHANGE_TOKEN);
+const identityConfigured = authProviderConfigured();
 if (
   prod &&
   (!process.env.PUBLIC_BASE_URL?.startsWith("https://") ||
@@ -214,7 +219,7 @@ export const server = http.createServer(async (req, res) => {
       return;
     }
     if (path === "/v1/config" && req.method === "GET") {
-      send(200, {appId:process.env.FINCLIP_APP_ID || "", apiBase:publicBase, frontend:"native-miniapp", loginReady:authMode !== "pending" && identityConfigured, sharing:"phiz-mini-program-card"});
+      send(200, {appId:process.env.FINCLIP_APP_ID || "", apiBase:publicBase, frontend:"native-miniapp", loginReady:authMode !== "pending" && (identityConfigured || (!prod && process.env.ALLOW_DEV_GUESTS === "true")), sharing:"phiz-mini-program-card"});
       return;
     }
     if (path === "/v1/campaign" && req.method === "GET") {

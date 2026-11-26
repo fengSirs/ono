@@ -2,7 +2,7 @@ import vm from "node:vm";
 import { readFileSync, existsSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 const root = resolve(import.meta.dirname, "../miniapp");
-export function native() {
+export function native(options = {}) {
   var definition,
     app,
     storage = {},
@@ -31,7 +31,7 @@ export function native() {
     navigateBack() {},
     hideShareMenu() {},
     login(o) {
-      calls.push({ type: "login" });
+      calls.push({ type: "login", provider: options.provider === "pz" ? "pz" : "ft" });
       o.success({ code: "test-code" });
     },
     showActionSheet(o) {
@@ -80,9 +80,31 @@ export function native() {
       return { unlink() {} };
     },
   };
+  var profile = Object.assign(
+    { userId: "phiz-user-test", username: "Phiz Tester", avatar: "" },
+    options.phizUser,
+  );
+  var pz =
+    options.provider === "pz"
+      ? {
+          login(o) {
+            calls.push({ type: "login", provider: "pz" });
+            o.success({
+              name: "login",
+              type: "success",
+              result: { code: "pz-test-code", errMsg: "login:ok" },
+            });
+          },
+          getPhizUserInfo(o) {
+            calls.push({ type: "profile" });
+            o.success(Object.assign({}, profile));
+          },
+        }
+      : null;
   var context = vm.createContext({
     console,
     ft,
+    ...(pz ? { pz } : {}),
     getApp: () => app,
     getCurrentPages: () => pages,
     App: (x) => (app = x),
@@ -134,9 +156,10 @@ export function native() {
     return module.exports;
   }
   load(resolve(root, "app.js"));
-  app.onLaunch({});
+  if (options.autoLogin !== false) app.onLaunch({});
   return {
     ft,
+    pz,
     calls,
     storage,
     get app() {

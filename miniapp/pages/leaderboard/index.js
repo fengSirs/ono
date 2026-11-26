@@ -1,8 +1,16 @@
-const ui = require("../../utils/page"), client = require("../../utils/client"), p = require("../../utils/platform"), poll = require("../../utils/poller"), words = require("../../utils/labels"), weekly = require("../../utils/weekly");
+const ui = require("../../utils/page"), client = require("../../utils/client"), p = require("../../utils/platform"), poll = require("../../utils/poller"), words = require("../../utils/labels"), weekly = require("../../utils/weekly"), features = require("../../utils/features");
 Page({
   data: { board: null, farm: null, join: null, signedIn: false, error: "", countdown: "", countdownLabel: "", fill: 0, showResult: false, loading: true, showRules: false },
-  onLoad: function (query) { this.week=query && query.week || undefined; ui.setup(this); },
+  onLoad: function (query) {
+    this.week=query && query.week || undefined;
+    ui.setup(this);
+    if (!features.leaderboard) {
+      p.toast(words.t(getApp().globalData.lang, "featureComingSoon"));
+      getApp().home();
+    }
+  },
   onShow: function () {
+    if (!features.leaderboard) return;
     var self = this;
     ui.setup(this);
     poll.start(this, function () { return self.refresh(); }, 10000);
@@ -12,6 +20,7 @@ Page({
   onUnload: function () { poll.stop(this); clearInterval(this.clock); },
   onPollError: function (e) { this.setData({ loading: false }); ui.fail(this, e); },
   refresh: function () {
+    if (!features.leaderboard) return Promise.resolve();
     var self = this, generation = this._generation, request = this._request = (this._request || 0) + 1;
     var signedIn = !!(getApp().globalData.session);
     var snapshot = signedIn ? client.game({ op: "christmas" }).catch(function () { return null; }) : Promise.resolve(null);
@@ -45,11 +54,12 @@ Page({
     return { hint: t("weeklyGrownHint"), button: t("compactFarm"), action: "farm" };
   },
   joinAction: function () {
+    if (!features.leaderboard) return;
     var join = this.data.join;
     if (!join) return;
     if (join.action === "claim") return this.claim();
     if (join.action === "signin") return getApp().home();
-    p.api().navigateTo({ url: "/pages/farm/index" + (join.action === "grow" ? "?focus=pet" : "") });
+    p.navigateTo({ url: "/pages/farm/index" + (join.action === "grow" ? "?focus=pet" : "") });
   },
   tick: function () {
     var board = this.data.board;
@@ -77,6 +87,9 @@ Page({
   next: function () { if (this.data.board.nextWeek) return this.selectWeek(this.data.board.nextWeek === this.data.board.currentWeek ? null : this.data.board.nextWeek); },
   current: function () { return this.selectWeek(null); },
   toggleRules: function () { this.setData({ showRules: !this.data.showRules }); },
-  claim: function () { p.api().navigateTo({ url: "/pages/claim/index" }); },
-  back: function () { p.api().navigateBack(); }
+  claim: function () {
+    if (!features.prize) return;
+    p.navigateTo({ url: "/pages/claim/index" });
+  },
+  back: function () { p.navigateBack(); }
 });

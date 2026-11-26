@@ -4,7 +4,18 @@
 
 当前已配置用户提供的 App ID：`6af733830efc7c0001051c6a`。开发与生产环境变量示例均已预填 `FINCLIP_APP_ID`，不要把身份交换服务密钥写入小程序。
 
-正式模式下，小程序 `ft.login` 获取 code，将 `{code,name}` 发至 `POST /v1/auth/finclip`。后端调用 **由 Phiz 团队提供的 HTTPS 身份校验服务**：
+正式模式下，小程序启动时静默登录。已有有效服务端会话先调用 `POST /v1/game {"op":"profile"}`，以后端返回的 `name` 为准；没有有效会话时才调用 `pz.login`，并把 `{code,name}` 发至 `POST /v1/auth/finclip`。首次建号时，`name` 优先使用 `pz.getPhizUserInfo` 返回的 `username`；同一 `openId` 后续登录由后端找回原账号，请求里的 `name` 不会覆盖用户已修改的昵称。后端支持两种服务端身份提供方，按配置选择：
+
+**A. Phiz OpenId（推荐，使用 Developer AppSecret）**
+
+```http
+GET https://admin.phiz.chat/api/3.0/token/getOpenId?appId=FINCLIP_APP_ID&appSecret=PHIZ_APP_SECRET&code=FINCLIP_LOGIN_CODE
+
+```
+
+小程序端调用原生 `pz.login`，成功返回形如 `{"name":"login","type":"success","result":{"code":"...","errMsg":"login:ok"}}`。后端将 `result.code` 作为一次性 code 调用上述 GET 接口，并从服务端响应的 `openId`（兼容 `data.openId`、`result.openId`）读取稳定身份。`appSecret` 只放服务器环境变量，绝不下发小程序，也不提交仓库。
+
+**B. 自定义身份交换服务（兼容旧部署）**
 
 ```http
 POST AUTH_EXCHANGE_URL
@@ -16,7 +27,7 @@ Content-Type: application/json
 
 该可信服务须校验 code 的真实性、有效期、所属 AppID 和一次性使用，成功返回 `200 {"subject":"稳定的 Phiz 用户唯一标识"}`。不要返回客户端自报的用户 ID。`subject` 仅保留在服务端身份映射表，不出现在公开邀请里。其他状态或无效 subject 均视为登录失败。
 
-后端还会对 code 的摘要做一天防重放记录。登录成功返回 `{session:{id,name,token,expires}}`；token 为 32 字节随机值，数据库只存摘要，默认 30 天有效。同一 subject 再登录会找回同一玩家的积分、宠物与房间归属；改昵称不会生成新身份。身份校验密钥只在后端配置，不放小程序包。
+后端还会对 code 的摘要做一天防重放记录。登录成功返回 `{session:{id,name,token,expires}}`；token 为 32 字节随机值，数据库只存摘要，默认 30 天有效。同一 subject 再登录会找回同一玩家的积分、宠物与房间归属。昵称保存在 `sessions.name`；`{op:"rename"}` 会更新该字段，并同步活跃房间 JSON 里的玩家名。改昵称不会生成新身份。身份校验密钥只在后端配置，不放小程序包。
 
 开发端 `POST /v1/auth/guest {name}` 只有非 production 且 `ALLOW_DEV_GUESTS=true` 才启用。游客依赖本地缓存保存身份，清除缓存后的新游客不会恢复旧钱包。正式活动必须使用 Phiz 稳定身份。
 

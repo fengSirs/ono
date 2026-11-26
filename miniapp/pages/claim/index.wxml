@@ -5,6 +5,6 @@
     <view class="claim-rank" wx:if="{{weeklyView.compactRank}}">{{weeklyView.compactRank}}</view><view class="claim-message" wx:if="{{!farm.claim}}">{{weeklyView.compactStatus}}</view>
     <view wx:if="{{farm.claim}}" class="stack"><view class="subtitle">{{statusText}}</view><view wx:if="{{farm.claim.tracking}}">{{c.tracking}}: {{farm.claim.tracking}}</view></view>
     <view wx:elif="{{farm.weekly.eligible}}" class="stack"><view class="notice" wx:if="{{!farm.config.canClaim}}">{{t.compactClaimClosed}}</view><view class="field-label">{{c.nameLabel}}</view><input value="{{name}}" maxlength="60" data-field="name" bindinput="field" aria-label="{{c.nameLabel}}" /><view class="field-label">{{c.contactLabel}}</view><input value="{{contact}}" maxlength="25" type="text" placeholder="{{c.contactPlaceholder}}" data-field="contact" bindinput="field" aria-label="{{c.contactLabel}}" /><checkbox-group bindchange="consent"><label class="tick"><checkbox value="yes" checked="{{consent}}" /><text>{{c.consent}}</text></label></checkbox-group><button class="full" bindtap="submit" disabled="{{busy || !consent || !farm.config.canClaim}}">{{c.submitClaim}}</button><view class="claim-footnote">{{t.compactClaimHint}}</view></view>
-    <button class="secondary full board-entry" bindtap="leaderboard">{{t.compactBoard}}</button>
+    <button wx:if="{{features.leaderboard}}" class="secondary full board-entry" bindtap="leaderboard">{{t.compactBoard}}</button>
   </view><button wx:else class="full" bindtap="refresh">{{t.retry}}</button>
 </view>

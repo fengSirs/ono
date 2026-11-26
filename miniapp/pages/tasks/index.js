@@ -42,19 +42,36 @@ Page({
       },
       10000,
     );
+    this.autoFillPhizId();
   },
   onHide: function () {
     poll.stop(this);
   },
   onUnload: function () {
     poll.stop(this);
-    var manager = p.api().getFileSystemManager();
+    var manager = p.fileSystemManager();
+    if (!manager) return;
     (this._privateFiles || []).forEach(function (path) {
       manager.unlink({ filePath: path, fail: function () {} });
     });
   },
   onPollError: function (e) {
     ui.fail(this, e);
+  },
+  autoFillPhizId: function () {
+    var self = this;
+    return getApp()
+      .phizProfile()
+      .then(function (profile) {
+        if (!self._visible || !profile || !profile.userId) {
+          console.warn("[ONO task form] Phiz UserID unavailable");
+          return;
+        }
+        if (self.data.profileLocked || self.data.phizId) return;
+        console.info("[ONO task form] Phiz UserID", profile.userId);
+        self.setData({ phizId: profile.userId });
+      })
+      .catch(function () {});
   },
   refresh: function () {
     var self = this,
@@ -102,7 +119,7 @@ Page({
       consent: false,
       error: "",
     });
-    p.api().pageScrollTo({ scrollTop: 0, duration: 200 });
+    p.pageScrollTo({ scrollTop: 0, duration: 200 });
   },
   close: function () {
     this.setData({ editing: null, proofs: [], previews: [] });
@@ -121,7 +138,7 @@ Page({
       var count = 3 - self.data.proofs.length;
       if (count < 1) return;
       return p
-        .call("chooseImage", {
+        .chooseImage({
           count: count,
           sizeType: ["compressed"],
           sourceType: ["album", "camera"],
@@ -201,10 +218,9 @@ Page({
           submission: e.currentTarget.dataset.id,
         })
         .then(function (r) {
-          var manager = p.api().getFileSystemManager(),
-            api = p.api(),
-            root = api.env && api.env.USER_DATA_PATH;
-          if (!root) throw Error("unsupportedApi");
+          var manager = p.fileSystemManager(),
+            root = p.userDataPath();
+          if (!manager || !root) throw Error("unsupportedApi");
           return Promise.all(
             r.evidence.proofs.map(function (data, i) {
               return new Promise(function (resolve, reject) {
@@ -226,12 +242,12 @@ Page({
               });
             }),
           ).then(function (paths) {
-            return p.call("previewImage", { urls: paths, current: paths[0] });
+            return p.previewImage({ urls: paths, current: paths[0] });
           });
         });
     });
   },
   back: function () {
-    p.api().navigateBack();
+    p.navigateBack();
   },
 });

@@ -1,9 +1,12 @@
 const p = require("./platform");
 function read(path) {
   return new Promise(function (resolve, reject) {
-    p.api()
-      .getFileSystemManager()
-      .readFile({
+    var manager = p.fileSystemManager();
+    if (!manager) {
+      reject(Error("taskImageInvalid"));
+      return;
+    }
+    manager.readFile({
         filePath: path,
         encoding: "base64",
         success: function (r) {
@@ -33,20 +36,28 @@ function read(path) {
 function prepare(path) {
   return read(path).then(function (image) {
     if (image.size <= 266668) return image;
-    if (typeof p.api().compressImage !== "function")
-      throw Error("imageTooLarge");
     return p
-      .call("compressImage", { src: path, quality: 50, compressedWidth: 1000 })
+      .compressImage({ src: path, quality: 50, compressedWidth: 1000 })
+        .catch(function (error) {
+          throw error.message === "unsupportedApi"
+            ? Error("imageTooLarge")
+            : error;
+        })
       .then(function (r) {
         return read(r.tempFilePath);
       })
       .then(function (result) {
         if (result.size <= 266668) return result;
         return p
-          .call("compressImage", {
+          .compressImage({
             src: path,
             quality: 25,
             compressedWidth: 720,
+          })
+          .catch(function (error) {
+            throw error.message === "unsupportedApi"
+              ? Error("imageTooLarge")
+              : error;
           })
           .then(function (r) {
             return read(r.tempFilePath);

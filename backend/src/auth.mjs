@@ -1,6 +1,8 @@
 import { randomBytes, createHash } from "node:crypto";
 import { env } from "./db.mjs";
 export const sha = (v) => createHash("sha256").update(String(v)).digest("hex");
+const DEFAULT_PHIZ_OPEN_BASE_URL = "https://admin.phiz.chat";
+const identityLocks = new Map();
 const fail = (key, status = 401) => {
   throw Object.assign(Error(key), { status });
 };
@@ -56,6 +58,124 @@ export function cleanName(name) {
   if (Array.from(value).length < 2) fail("nameRequired", 400);
   return value;
 }
+function identityProvider() {
+  const appId = process.env.FINCLIP_APP_ID;
+  if (!appId) fail("authNotConfigured", 503);
+
+  // Preferred: the Phiz OpenId exchange documented for native pz.login.
+  const phizBase =
+    process.env.PHIZ_OPEN_BASE_URL?.trim() || DEFAULT_PHIZ_OPEN_BASE_URL;
+  const phizSecret = process.env.PHIZ_APP_SECRET?.trim();
+  if (phizSecret) {
+    let base;
+    try {
+      base = new URL(phizBase);
+    } catch {
+      fail("authNotConfigured", 503);
+    }
+    if (
+      base.protocol !== "https:" ||
+      base.username ||
+      base.password ||
+      base.search ||
+      base.hash
+    )
+      fail("authNotConfigured", 503);
+    return {
+      kind: "phiz",
+      appId,
+      secret: phizSecret,
+      url: new URL("/api/3.0/token/getOpenId", base).toString(),
+    };
+  }
+
+  // Compatibility: a trusted exchange service implementing {code,appId} -> {subject}.
+  const url = process.env.AUTH_EXCHANGE_URL;
+  const secret = process.env.AUTH_EXCHANGE_TOKEN;
+  if (!url || !secret) fail("authNotConfigured", 503);
+  if (!url.startsWith("https://")) fail("authNotConfigured", 503);
+  return { kind: "exchange", appId, secret, url };
+}
+
+export function authProviderConfigured() {
+  try {
+    identityProvider();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function withIdentityLock(key, fn) {
+  const previous = identityLocks.get(key) || Promise.resolve();
+  let unlock;
+  const current = new Promise((resolve) => (unlock = resolve));
+  identityLocks.set(key, current);
+  await previous;
+  try {
+    return await fn();
+  } finally {
+    unlock();
+    if (identityLocks.get(key) === current) identityLocks.delete(key);
+  }
+}
+
+function openIdFrom(payload) {
+  if (!payload || typeof payload !== "object") return "";
+  if (
+    payload.code !== undefined &&
+    ![0, 200, "0", "200"].includes(payload.code)
+  )
+    return "";
+  const candidates = [
+    payload.openId,
+    payload.openid,
+    payload.data?.openId,
+    payload.data?.openid,
+    payload.result?.openId,
+    payload.result?.openid,
+  ];
+  return candidates.find(
+    (value) => typeof value === "string" && value.trim(),
+  ) || "";
+}
+
+async function exchangeIdentity(provider, code) {
+  const url = provider.kind === "phiz" ? new URL(provider.url) : provider.url;
+  if (provider.kind === "phiz") {
+    url.search = new URLSearchParams({
+      appId: provider.appId,
+      appSecret: provider.secret,
+      code,
+    }).toString();
+  }
+  const res = await fetch(url, {
+    method: "GET",
+    redirect: "error",
+    signal: AbortSignal.timeout(10000),
+    headers: { Accept: "application/json" },
+    ...(provider.kind === "exchange"
+      ? {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: "Bearer " + provider.secret,
+          },
+          body: JSON.stringify({ code, appId: provider.appId }),
+        }
+      : {}),
+  });
+  if (!res.ok) fail("loginFailed");
+  const payload = await res.json();
+  if (provider.kind === "phiz") {
+    const openId = openIdFrom(payload);
+    if (!openId) fail("loginFailed");
+    return { subject: openId };
+  }
+  return payload;
+}
+
 export async function login(body, core, { mode = "guest" } = {}) {
   const name = cleanName(body.name);
   if (mode === "guest") {
@@ -69,15 +189,11 @@ export async function login(body, core, { mode = "guest" } = {}) {
   }
   const code = String(body.code || "");
   if (!/^[A-Za-z0-9._-]{6,512}$/.test(code)) fail("loginCodeRequired", 400);
-  const url = process.env.AUTH_EXCHANGE_URL,
-    secret = process.env.AUTH_EXCHANGE_TOKEN,
-    appId = process.env.FINCLIP_APP_ID;
-  if (!url || !secret || !appId) fail("authNotConfigured", 503);
-  if (!url.startsWith("https://")) fail("authNotConfigured", 503);
+  const provider = identityProvider();
   await env.DB.prepare("DELETE FROM mini_auth_codes WHERE created<?")
     .bind(Date.now() - 86400000)
     .run();
-  const codeKey = sha(appId + ":" + code);
+  const codeKey = sha(provider.appId + ":" + code);
   try {
     await env.DB.prepare("INSERT INTO mini_auth_codes VALUES(?,?)")
       .bind(codeKey, Date.now())
@@ -87,18 +203,7 @@ export async function login(body, core, { mode = "guest" } = {}) {
   }
   let identity;
   try {
-    const res = await fetch(url, {
-      method: "POST",
-      redirect: "error",
-      signal: AbortSignal.timeout(10000),
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + secret,
-      },
-      body: JSON.stringify({ code, appId }),
-    });
-    if (!res.ok) fail("loginFailed");
-    identity = await res.json();
+    identity = await exchangeIdentity(provider, code);
   } catch {
     fail("loginFailed");
   }
@@ -108,22 +213,25 @@ export async function login(body, core, { mode = "guest" } = {}) {
     identity.subject.length > 200
   )
     fail("loginFailed");
-  const issuer = "phiz:" + appId;
-  let linked = await env.DB.prepare(
-    "SELECT s.id,s.name FROM mini_identities i JOIN sessions s ON s.id=i.player WHERE i.issuer=? AND i.subject=?",
-  )
-    .bind(issuer, identity.subject)
-    .first();
-  if (!linked) {
-    const player = await core({ op: "session", name });
-    await env.DB.prepare("INSERT OR IGNORE INTO mini_identities VALUES(?,?,?)")
-      .bind(issuer, identity.subject, player.id)
-      .run();
-    linked = await env.DB.prepare(
+  const issuer = "phiz:" + provider.appId;
+  const linked = await withIdentityLock(issuer + ":" + identity.subject, async () => {
+    let player = await env.DB.prepare(
       "SELECT s.id,s.name FROM mini_identities i JOIN sessions s ON s.id=i.player WHERE i.issuer=? AND i.subject=?",
     )
       .bind(issuer, identity.subject)
       .first();
-  }
+    if (!player) {
+      const created = await core({ op: "session", name });
+      await env.DB.prepare("INSERT OR IGNORE INTO mini_identities VALUES(?,?,?)")
+        .bind(issuer, identity.subject, created.id)
+        .run();
+      player = await env.DB.prepare(
+        "SELECT s.id,s.name FROM mini_identities i JOIN sessions s ON s.id=i.player WHERE i.issuer=? AND i.subject=?",
+      )
+        .bind(issuer, identity.subject)
+        .first();
+    }
+    return player;
+  });
   return issue(linked);
 }

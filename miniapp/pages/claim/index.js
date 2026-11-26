@@ -1,10 +1,12 @@
 const ui = require("../../utils/page"),
   client = require("../../utils/client"),
   p = require("../../utils/platform"),
+  features = require("../../utils/features"),
   words = require("../../utils/labels");
 Page({
   data: {
     farm: null,
+    features: features,
     name: "",
     contact: "",
     consent: false,
@@ -13,11 +15,17 @@ Page({
   },
   onLoad: function () {
     ui.setup(this);
+    if (!features.prize) {
+      p.toast(words.t(getApp().globalData.lang, "featureComingSoon"));
+      getApp().home();
+    }
   },
   onShow: function () {
+    if (!features.prize) return;
     this.refresh();
   },
   refresh: function () {
+    if (!features.prize) return Promise.resolve();
     var self = this;
     return client
       .game({ op: "christmas" })
@@ -43,6 +51,7 @@ Page({
     this.setData({ consent: e.detail.value.length > 0 });
   },
   submit: function () {
+    if (!features.prize) return;
     var self = this;
     ui.busy(this, function () {
       return client
@@ -63,9 +72,10 @@ Page({
     });
   },
   leaderboard: function () {
-    p.api().navigateTo({ url: "/pages/leaderboard/index" });
+    if (!features.leaderboard) return;
+    p.navigateTo({ url: "/pages/leaderboard/index" });
   },
   back: function () {
-    p.api().navigateBack();
+    p.navigateBack();
   },
 });

@@ -21,7 +21,7 @@
     /><button
       class="full"
       bindtap="join"
-      disabled="{{busy || !preview || preview.full || preview.status !== 'waiting'}}"
+      disabled="{{busy || !name || name.length < 2 || !preview || preview.full || preview.status !== 'waiting'}}"
       loading="{{busy}}"
     >
       {{t.inviteJoin}}</button

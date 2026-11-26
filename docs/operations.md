@@ -49,7 +49,7 @@ node backend/ops/christmas-admin.mjs ship 'CLAIM_ID' 'TRACKING_OR_FULFILMENT_REF
 
 ## 数据与网络
 
-生产设置 HTTPS `PUBLIC_BASE_URL`、`FINCLIP_APP_ID` 并关闭游客。暂未接入身份接口时显式使用 `AUTH_MODE=pending`，该模式关闭所有登录、对局和奖励请求，仅提供健康检查、公开配置与素材。接入真实 `AUTH_EXCHANGE_URL` 和服务端密钥后切换 `AUTH_MODE=finclip`，默认 finclip 模式仍强制要求身份配置。按 `docs/nginx.example.conf` 配置独立 API 入口，示例没有关联任何已有域名。只在可信本机反代场景开启 `TRUST_LOOPBACK_PROXY`，反代必须覆盖 X-Real-IP。
+生产设置 HTTPS `PUBLIC_BASE_URL`、`FINCLIP_APP_ID` 并关闭游客。暂未接入身份接口时显式使用 `AUTH_MODE=pending`，该模式关闭所有登录、对局和奖励请求，仅提供健康检查、公开配置与素材。接入 Phiz OpenId（`PHIZ_OPEN_BASE_URL` + `PHIZ_APP_SECRET`）或自定义 `AUTH_EXCHANGE_URL` + 服务端密钥后切换 `AUTH_MODE=finclip`，默认 finclip 模式仍强制要求身份配置。按 `docs/nginx.example.conf` 配置独立 API 入口，示例没有关联任何已有域名。只在可信本机反代场景开启 `TRUST_LOOPBACK_PROXY`，反代必须覆盖 X-Real-IP。
 
 默认每 IP 每分钟最多 20 次登录、600 次其他请求。若多人共用同一出口，结合真实规模配置独立网关限流；不要未经评估提高奖励操作限额。若请求带 Origin，则只接受 PUBLIC_BASE_URL 或 CORS_ORIGINS 中精确配置的来源；原生小程序通常没有浏览器 Origin。
 

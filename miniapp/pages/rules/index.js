@@ -1,6 +1,7 @@
 const ui = require("../../utils/page"),
   client = require("../../utils/client"),
   p = require("../../utils/platform"),
+  features = require("../../utils/features"),
   words = require("../../utils/labels");
 Page({
   data: { rules: [], error: "" },
@@ -13,7 +14,7 @@ Page({
         var c = f.config,
           lang = getApp().globalData.lang;
         self.setData({
-          rules: [1, 2, 3, 4, 5].map(function (n) {
+          rules: (features.leaderboard && features.prize ? [1, 2, 3, 4, 5] : [1, 2, 3, 5]).map(function (n) {
             return words.t(lang, "rules" + n, {
               bonus: c.winBonus,
               cap: c.gameDailyCap,
@@ -35,7 +36,7 @@ Page({
   },
   back: function () {
     var pages = getCurrentPages();
-    if (pages.length > 1) p.api().navigateBack();
+    if (pages.length > 1) p.navigateBack();
     else getApp().home();
   },
 });

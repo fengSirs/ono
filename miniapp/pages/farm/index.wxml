@@ -16,7 +16,7 @@
         <view class="exchange-row"><text>{{ratio}}</text><button class="small secondary" bindtap="exchange" disabled="{{busy || !farm.config.canEarn || amount < 1 || amount > canExchange}}">{{t.compactExchange}}</button></view>
       </view>
     </view>
-    <view wx:if="{{challenge}}" class="challenge-card {{celebrate ? 'challenge-won' : ''}}">
+    <view wx:if="{{features.leaderboard && challenge}}" class="challenge-card {{celebrate ? 'challenge-won' : ''}}">
       <view class="challenge-cover"><view class="fairy-lights"/><view class="challenge-tags"><text class="holiday-tag">{{t.christmasTag}}</text><text wx:if="{{challenge.badge}}" class="rank-ticket">{{challenge.badge}}</text></view>
         <view class="challenge-art"><text class="challenge-title">{{t.compactBoard}}</text><image class="challenge-turkey" src="/assets/christmas/turkey-baby.webp" mode="aspectFit"/><text class="star-flight" aria-hidden="true">✦　✧　✦</text></view></view>
       <view class="challenge-footer"><view class="challenge-hint">{{challenge.hint}}</view>
@@ -26,7 +26,7 @@
     <button class="extras-toggle" bindtap="toggleMore" aria-expanded="{{showMore}}">{{showMore ? t.compactHideMore : t.compactExtras}}</button>
     <view wx:if="{{showMore}}">
       <view class="panel"><view class="subtitle">{{c.growthCollection}}</view><view class="choose"><button wx:for="{{scenes}}" wx:key="id" class="choice small {{scene === item.id ? 'active' : ''}}" disabled="{{item.locked}}" data-id="{{item.id}}" bindtap="scene">{{item.label}}</button></view></view>
-      <view class="panel"><view class="subtitle">{{t.compactPrize}}</view><image class="prize" src="/assets/christmas/kit-seara.webp" mode="aspectFit" aria-label="{{c.kitAlt}}" /><view class="help">{{t.compactClaimHint}}</view></view>
+      <view wx:if="{{features.prize}}" class="panel"><view class="subtitle">{{t.compactPrize}}</view><image class="prize" src="/assets/christmas/kit-seara.webp" mode="aspectFit" aria-label="{{c.kitAlt}}" /><view class="help">{{t.compactClaimHint}}</view></view>
       <view class="panel"><view class="subtitle">{{c.history}}</view><view wx:if="{{!ledger.length}}" class="muted">{{c.empty}}</view><view wx:for="{{ledger}}" wx:key="id" class="player"><text class="grow">{{item.label}}</text><text>{{item.points > 0 ? '+' : ''}}{{item.points}} / {{item.feed > 0 ? '+' : ''}}{{item.feed}} / {{item.fed > 0 ? '+' : ''}}{{item.fed}}</text></view><view class="help">{{c.points}} / {{c.feed}} / {{c.fed}}</view><view class="help">{{quota}}</view></view>
     </view>
   </view><button wx:elif="{{error}}" class="full" bindtap="refresh">{{t.retry}}</button><view wx:else class="help">{{t.loading}}</view>

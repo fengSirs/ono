@@ -45,6 +45,7 @@ const extra = {
   compactClaimHint: ["Entrega após análise do pedido.", "Delivery follows claim review.", "登记后审核发放"],
   compactClaimClosed: ["O prazo de resgate terminou.", "The claim period has ended.", "申领已截止"],
   compactMyClaim: ["Meu pedido", "My claim", "我的申领"],
+  featureComingSoon: ["Em breve", "Coming soon", "功能暂未开放"],
 
   weeklyTitle: ["Ranking semanal", "Weekly leaderboard", "每周达成榜"],
   weeklyEntry: ["Ver ranking semanal", "View weekly leaderboard", "查看每周排行榜"],
@@ -266,6 +267,16 @@ const extra = {
     "Atualize o aplicativo para usar este recurso.",
     "Update the host app to use this feature.",
     "请更新宿主 App 后使用此功能。",
+  ],
+  domainNotAllowed: [
+    "O domínio da API não está liberado no FinClip.",
+    "The API domain is not allowed by FinClip.",
+    "API 域名没有被 FinClip 放行。",
+  ],
+  insecureRequest: [
+    "O app não permite HTTP para este endereço.",
+    "The app does not allow HTTP for this address.",
+    "宿主 App 不允许请求这个 HTTP 地址。",
   ],
 };
 function interpolate(s, values) {

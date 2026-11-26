@@ -4,6 +4,7 @@ import { resolve } from "node:path";
 
 const templates = {
   local: "miniapp/config.local.example.js",
+  test: "miniapp/config.test.example.js",
   prod: "miniapp/config.production.example.js",
   production: "miniapp/config.production.example.js",
 };
@@ -12,7 +13,7 @@ const target = process.argv[2];
 const source = templates[target];
 
 if (!source) {
-  console.error("用法: node scripts/use-config.mjs <local|prod>");
+  console.error("用法: node scripts/use-config.mjs <local|test|prod>");
   process.exit(1);
 }
 

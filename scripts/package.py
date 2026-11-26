@@ -7,7 +7,7 @@ import sys
 
 root = Path(__file__).resolve().parents[1]
 output = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else root.parent / 'ono-finclip-source-v1.0.1.zip'
-excluded = {'node_modules', '.git', '__pycache__', '.DS_Store'}
+excluded = {'node_modules', '.git', '__pycache__', 'dist', 'tmp'}
 
 def allowed(p):
     rel = p.relative_to(root)

@@ -20,7 +20,7 @@ Page({
   },
   onLoad: function (q) {
     ui.setup(this);
-    this.id = q.id || p.api().getStorageSync("ono.room");
+    this.id = q.id || p.storage.get("ono.room");
     this.setData({ sound: audio.init() });
   },
   onShow: function () {
@@ -58,12 +58,22 @@ Page({
   onPollError: function (e) {
     ui.fail(this, e);
   },
+  meId: function () {
+    var session = getApp().globalData.session;
+    if (!session || !session.id) throw Error("sessionExpired");
+    return session.id;
+  },
   refresh: function () {
     var self = this,
       generation = this._generation;
-    return client.game({ op: "state", room: this.id }).then(function (r) {
-      if (self._visible && generation === self._generation) self.apply(r);
-    });
+    return getApp()
+      .ensureSession()
+      .then(function () {
+        return client.game({ op: "state", room: self.id });
+      })
+      .then(function (r) {
+        if (self._visible && generation === self._generation) self.apply(r);
+      });
   },
   apply: function (result) {
     var room = result.room,
@@ -78,11 +88,13 @@ Page({
     }
     if (!g) return;
     var lang = getApp().globalData.lang,
+      meId = this.meId(),
       me = g.players.find(function (x) {
-        return x.id === getApp().globalData.session.id;
-      }),
-      myTurn = g.status === "playing" && g.players[g.turn].id === me.id;
+        return x.id === meId;
+      });
+    if (!me) throw Error("sessionExpired");
     var turnKey = g.round + ":" + g.turnSeq,
+      myTurn = g.status === "playing" && g.players[g.turn].id === meId,
       selected = this.data.selected.filter(function (id) {
         return me.hand.some(function (c) {
           return c.id === id;
@@ -93,7 +105,7 @@ Page({
       this.setData({ uno: false });
       if (myTurn) {
         audio.play("turn");
-        if (p.api().vibrateShort) p.api().vibrateShort({ type: "light" });
+        p.vibrateShort().catch(function () {});
       }
     }
     this._turnKey = turnKey;
@@ -125,7 +137,7 @@ Page({
     }
     this._eventSeq = latest ? latest.seq : 0;
     var ownReward = (room.rewards || []).filter(function (x) {
-      return x.player === me.id;
+      return x.player === meId;
     })[0];
     var winner = g.players.find(function (x) {
       return x.id === g.winner;
@@ -180,9 +192,15 @@ Page({
   choose: function (e) {
     if (this._busy || !this.data.myTurn) return;
     var room = this.data.room,
+      meId = this.meId(),
       me = room.game.players.find(function (x) {
-        return x.id === getApp().globalData.session.id;
+        return x.id === meId;
       });
+    if (!me) {
+      getApp().clearSession();
+      ui.fail(this, Error("sessionExpired"));
+      return;
+    }
     try {
       var selected = cards.choose(
         me.hand,
@@ -238,19 +256,21 @@ Page({
     if (!this.data.myTurn || !this.data.selected.length) return;
     ui.busy(this, function () {
       var g = self.data.room.game,
+        meId = self.meId(),
         me = g.players.find(function (x) {
-          return x.id === getApp().globalData.session.id;
-        }),
-        selection = self.data.selected.map(function (id) {
+          return x.id === meId;
+        });
+      if (!me) throw Error("sessionExpired");
+      var selection = self.data.selected.map(function (id) {
           return me.hand.find(function (c) {
             return c.id === id;
           });
         }),
-        options = cards.colors(selection);
-      var choose =
-        options.length > 1
-          ? p
-              .call("showActionSheet", {
+        options = cards.colors(selection),
+        choose =
+          options.length > 1
+            ? p
+              .showActionSheet({
                 itemList: options.map(function (c) {
                   return words.t(getApp().globalData.lang, c);
                 }),
@@ -304,6 +324,6 @@ Page({
     });
   },
   farm: function () {
-    p.api().navigateTo({ url: "/pages/farm/index?focus=pet" });
+    p.navigateTo({ url: "/pages/farm/index?focus=pet" });
   },
 });

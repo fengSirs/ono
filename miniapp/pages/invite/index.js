@@ -13,17 +13,22 @@ Page({
   },
   onLoad: function (q) {
     ui.setup(this);
-    this.setData({
-      name:
-        (getApp().globalData.session || {}).name ||
-        p.api().getStorageSync("ono.name") ||
-        "",
-    });
     this.acceptLaunch(q.token || getApp().globalData.pendingInvite);
   },
   onShow: function () {
     ui.setup(this);
-    this.setData({ savedRoom: p.api().getStorageSync("ono.room") || "" });
+    this.setData({ savedRoom: p.storage.get("ono.room") || "" });
+    if (!getApp().globalData.session) {
+      var self = this;
+      getApp()
+        .ensureSession()
+        .then(function (session) {
+          self.setData({ name: session.name });
+        })
+        .catch(function (error) {
+          ui.fail(self, error);
+        });
+    }
     if (this.data.preview) this.refresh();
   },
   acceptLaunch: function (token) {
@@ -80,8 +85,14 @@ Page({
   join: function () {
     var self = this;
     ui.busy(this, function () {
+      var desiredName = String(self.data.name || "").trim();
       return getApp()
-        .ensureSession(self.data.name)
+        .ensureSession()
+        .then(function (session) {
+          return desiredName.length >= 2 && desiredName !== session.name
+            ? getApp().rename(desiredName)
+            : session;
+        })
         .then(function () {
           return client.request(
             "/v1/invitations/" + self.data.token + "/join",
@@ -95,8 +106,8 @@ Page({
     });
   },
   resume: function () {
-    var id = p.api().getStorageSync("ono.room");
-    if (id) p.api().redirectTo({ url: "/pages/room/index?id=" + id });
+    var id = p.storage.get("ono.room");
+    if (id) p.redirectTo({ url: "/pages/room/index?id=" + id });
   },
   home: function () {
     getApp().home();

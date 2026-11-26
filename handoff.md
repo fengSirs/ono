@@ -128,8 +128,10 @@ sudo -u ono-finclip cp /var/lib/ono-finclip/ono.sqlite \
 | `PUBLIC_BASE_URL` | `https://ono.phizminiapp.com` | 公开 HTTPS 地址 |
 | `FINCLIP_APP_ID` | `6af733830efc7c0001051c6a` | 与小程序一致 |
 | `AUTH_MODE` | 先 `pending`，接入身份后 `finclip` | `pending` 会关闭登录/对局/榜单/奖励 |
-| `AUTH_EXCHANGE_URL` | 身份服务地址 | 仅在 `AUTH_MODE=finclip` 时需要 |
-| `AUTH_EXCHANGE_TOKEN` | 服务端密钥 | 不要写进小程序 |
+| `PHIZ_OPEN_BASE_URL` | `https://admin.phiz.chat` | Phiz OpenId API 基址，不是小程序业务域名；后端固定访问 `/api/3.0/token/getOpenId` |
+| `PHIZ_APP_SECRET` | Developer AppSecret | 仅服务端，绝不写入小程序或 Git |
+| `AUTH_EXCHANGE_URL` | 兼容旧部署的身份服务地址 | 与 `PHIZ_APP_SECRET` 二选一 |
+| `AUTH_EXCHANGE_TOKEN` | 兼容旧部署的服务端密钥 | 与 `PHIZ_APP_SECRET` 二选一 |
 | `ALLOW_DEV_GUESTS` | `false` | 生产禁止游客登录 |
 | `TRUST_LOOPBACK_PROXY` | `true` | 仅本机 Nginx 反代时开启 |
 
@@ -300,8 +302,8 @@ module.exports = {
 本轮实测：
 
 ```text
-npm run check  → 55 files passed
-npm test       → 68 tests, 68 pass, 0 fail
+npm run check  → 56 files passed
+npm test       → 75 tests, 75 pass, 0 fail
 ```
 
 `docs/verification.md` 中「54 项 / 65 项」是历史记录，不是本轮最新数字。
@@ -393,8 +395,8 @@ npm test       → 68 tests, 68 pass, 0 fail
 已完成：
 
 - `npm run build`
-- `npm run check`：55 个文件通过
-- `npm test`：68 项通过，0 失败
+- `npm run check`：56 个文件通过
+- `npm test`：75 项通过，0 失败
 - 本机后端 `4390` 启动，`/healthz` 正常
 - FinClip Studio 3.0.6、iPhone 5 模拟器、100% 缩放，周榜页实际预览通过
 - 匿名榜单 200、`own=null`；私有 op 401（在开发/联调模式验证）
@@ -408,7 +410,7 @@ npm test       → 68 tests, 68 pass, 0 fail
 - 未在生产库副本上演练历史完成记录迁移。
 - 未接真实礼盒库存和人工发奖全流程。
 
-`docs/verification.md` 和 `README.md` 中有部分历史描述（例如「本机没有 FinClip Studio」「54/65 项测试」；本轮静态检查为 55 个文件），以本文件 §3.6 和 §6 为准。
+`docs/verification.md` 和 `README.md` 中有部分历史描述（例如「本机没有 FinClip Studio」「54/65 项测试」；本轮静态检查为 56 个文件），以本文件 §3.6 和 §6 为准。
 
 ---
 

@@ -170,8 +170,10 @@ test('HTTP leaderboard is public for visitors and keeps authenticated envelopes 
 }));
 
 test('native leaderboard displays own qualification, navigates history, and ignores stale responses', async () => {
-  const n = native();
+  const n = native({autoLogin:false});
   try {
+    const features = n.load('utils/features');
+    features.leaderboard = true; features.prize = true;
     n.app.globalData.lang='zh'; n.app.globalData.session={id:'me'};
     const now = Date.parse('2026-11-24T12:00:00Z'); const week = brasiliaWeek(now);
     const board = {now,week:week.key,currentWeek:week.key,startsAt:week.start,endsAt:week.end,limit:100,remaining:99,completed:1,eligible:true,own:{rank:1,week:week.key},previousWeek:'2026-11-16',nextWeek:null,entries:[{rank:1,name:'Ana',completedAt:now,isMe:1}]};
@@ -206,8 +208,10 @@ test('native leaderboard displays own qualification, navigates history, and igno
 });
 
 test('weekly board is visible to visitors and unfinished players with a grow shortcut', async () => {
-  const n = native();
+  const n = native({autoLogin:false});
   try {
+    const features = n.load('utils/features');
+    features.leaderboard = true; features.prize = true;
     const now = Date.parse('2026-11-24T12:00:00Z'), week = brasiliaWeek(now);
     const board = {now,week:week.key,currentWeek:week.key,startsAt:week.start,endsAt:week.end,limit:100,remaining:100,completed:0,eligible:false,own:null,canEarn:true,phase:'live',previousWeek:null,nextWeek:null,entries:[]};
     n.app.globalData.lang='zh';

@@ -2,14 +2,14 @@ const p = require("./platform");
 var contexts = [],
   enabled = true;
 function init() {
-  var stored = p.api().getStorageSync("ono.sound");
+  var stored = p.storage.get("ono.sound");
   enabled = stored !== false;
   return enabled;
 }
 function play(cue) {
-  if (!enabled || typeof p.api().createInnerAudioContext !== "function") return;
+  if (!enabled || !p.hasAudio()) return;
   try {
-    var ctx = p.api().createInnerAudioContext();
+    var ctx = p.createInnerAudioContext();
     contexts.push(ctx);
     ctx.src = "/assets/audio/" + cue + ".wav";
     ctx.volume = 0.45;
@@ -36,7 +36,7 @@ function stop() {
 }
 function toggle() {
   enabled = !enabled;
-  p.api().setStorageSync("ono.sound", enabled);
+  p.storage.set("ono.sound", enabled);
   if (!enabled) stop();
   return enabled;
 }

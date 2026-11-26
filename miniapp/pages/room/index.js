@@ -12,9 +12,9 @@ Page({
     shareFailed: false,
   },
   onLoad: function (q) {
-    this.id = q.id || p.api().getStorageSync("ono.room");
+    this.id = q.id || p.storage.get("ono.room");
     ui.setup(this);
-    if (p.api().hideShareMenu) p.api().hideShareMenu({});
+    p.hideShareMenu().catch(function () {});
   },
   onShow: function () {
     var self = this;
@@ -36,29 +36,35 @@ Page({
   refresh: function () {
     var self = this,
       generation = this._generation;
-    return client.game({ op: "state", room: this.id }).then(function (r) {
-      if (!self._visible || generation !== self._generation) return;
-      self.id = r.room.id;
-      getApp().rememberRoom(r.room);
-      if (r.room.status !== "waiting") {
-        getApp().openRoom(r.room);
-        return;
-      }
-      self.setData({
-        room: r.room,
-        seats: Array.from({length:r.room.capacity}, function(_,index){return r.room.players[index] || {id:'empty-'+index};}),
-        isHost: r.room.host === getApp().globalData.session.id,
-        error: "",
+    return getApp()
+      .ensureSession()
+      .then(function (session) {
+        return client
+          .game({ op: "state", room: self.id })
+          .then(function (r) {
+            if (!self._visible || generation !== self._generation) return;
+            self.id = r.room.id;
+            getApp().rememberRoom(r.room);
+            if (r.room.status !== "waiting") {
+              getApp().openRoom(r.room);
+              return;
+            }
+            self.setData({
+              room: r.room,
+              seats: Array.from({length:r.room.capacity}, function(_,index){return r.room.players[index] || {id:'empty-'+index};}),
+              isHost: r.room.host === session.id,
+              error: "",
+            });
+            if (
+              r.room.kind === "private" &&
+              (!self.invite || self.invite.expires < Date.now() + 60000) &&
+              !self._preparing
+            )
+              self.prepare();
+            else if (self.invite && r.room.kind === "private")
+              self.setData({ shareReady: true });
+          });
       });
-      if (
-        r.room.kind === "private" &&
-        (!self.invite || self.invite.expires < Date.now() + 60000) &&
-        !self._preparing
-      )
-        self.prepare();
-      else if (self.invite && r.room.kind === "private")
-        self.setData({ shareReady: true });
-    });
   },
   prepare: function () {
     var self = this;

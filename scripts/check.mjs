@@ -70,6 +70,17 @@ for (const file of all.filter(
   var s = await readFile(file, "utf8");
   if (/document\.|window\.|localStorage|<web-view|react-dom/.test(s))
     throw Error("H5 dependency in native miniapp: " + file);
+  if (/p\.api\(|platform\.api\(/.test(s))
+    throw Error("Raw platform object in native miniapp: " + file);
+}
+for (const file of all.filter(
+  (x) => x.startsWith(mini) && x.endsWith(".js") && !x.endsWith("platform.js"),
+)) {
+  const s = await readFile(file, "utf8");
+  if (/\b(?:ft|wx|pz)\s*\./.test(s))
+    throw Error("Direct native object outside platform adapter: " + file);
+  if (/\b(?:get|set|remove)StorageSync\s*\(/.test(s))
+    throw Error("Direct storage API outside platform adapter: " + file);
 }
 console.log(
   "Native structure, JavaScript syntax, JSON, WXML balance, event handlers and three-language labels: " +

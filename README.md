@@ -50,11 +50,9 @@ node scripts/start.mjs
 1. 保持本地后端运行在 `127.0.0.1:4390`。
 2. 在 FinClip Studio 中导入 **`miniapp/` 目录**，不是仓库根目录。
 3. 确认 `miniapp/config.js` 使用本地配置（`npm run config:local`）。
-4. 编译后从大厅进入；周榜页可直接在 DevTools 控制台执行：
+4. 编译后从大厅进入；业务代码统一通过 `miniapp/utils/platform.js` 调用原生 API，页面代码不要直接使用 `ft` / `wx` / `pz`。
 
-```js
-ft.navigateTo({ url: "/pages/leaderboard/index" })
-```
+说明：业务代码不会 `console.log` Toast。FinClip IDE/DevTools 可能会在渲染进程控制台里自动记录原生 bridge 调用（例如 `showToast:ok`），这是开发工具的 API 追踪行为，不是业务代码主动打印。
 
 真机上的 `127.0.0.1` 指向手机自身，需要改成手机可访问的开发地址，并在 FinClip 后台配置合法域名。
 
@@ -82,7 +80,7 @@ npm run verify
 - `npm run check`：检查小程序结构、脚本、JSON、WXML、事件和三语文案
 - `npm test`：运行 Node 原生测试
 
-当前基线：55 个文件检查通过，68 项测试通过、0 失败。测试使用临时 SQLite 和本机 HTTP 服务，不需要生产数据。
+当前基线：56 个文件检查通过，75 项测试通过、0 失败。测试使用临时 SQLite 和本机 HTTP 服务，不需要生产数据。
 
 重新打源码包：
 
@@ -113,10 +111,16 @@ ONO_DB=/var/lib/ono-finclip/ono.sqlite
 PUBLIC_BASE_URL=https://ono.phizminiapp.com
 FINCLIP_APP_ID=6af733830efc7c0001051c6a
 AUTH_MODE=pending
+# 推荐：Phiz OpenId（AppSecret 仅服务端）
+# PHIZ_OPEN_BASE_URL=https://admin.phiz.chat
+# PHIZ_APP_SECRET=...
+# 兼容旧部署：自定义身份交换服务
+# AUTH_EXCHANGE_URL=https://...
+# AUTH_EXCHANGE_TOKEN=...
 TRUST_LOOPBACK_PROXY=true
 ```
 
-在真实 Phiz 身份兑换配置完成前，保持 `AUTH_MODE=pending`，不要打开开发游客对公网使用。
+在真实 Phiz 身份兑换配置完成前，保持 `AUTH_MODE=pending`，不要打开开发游客对公网使用。接入 `PHIZ_OPEN_BASE_URL` + `PHIZ_APP_SECRET` 后，把 `AUTH_MODE` 改为 `finclip`。后端会按 OpenId 文档调用 `GET /api/3.0/token/getOpenId`，将 AppSecret 保留在服务器环境变量中。
 
 ## 活动规则
 

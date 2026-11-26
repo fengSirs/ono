@@ -3,7 +3,7 @@ const platform = require("./platform"),
 function setup(page) {
   var app = getApp();
   page.setData(words.labels(app.globalData.lang));
-  platform.api().setNavigationBarTitle({ title: "ONO!" });
+  platform.setNavigationBarTitle({ title: "ONO!" });
 }
 function changeLang(page, event) {
   var languages = ["pt", "en", "zh"],
@@ -40,7 +40,7 @@ function fail(page, e) {
 }
 function confirm(key) {
   return platform
-    .call("showModal", {
+    .showModal({
       title: "ONO!",
       content: words.t(getApp().globalData.lang, key),
       cancelText: words.t(getApp().globalData.lang, "cancel"),
